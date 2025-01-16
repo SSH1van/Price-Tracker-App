@@ -107,6 +107,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Функция для сортировки таблицы
+function sortTable(columnIndex) {
+    const table = document.getElementById("product-table");
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.rows);
+
+    // Определяем порядок сортировки: asc (по умолчанию) или desc
+    const isAscending = table.dataset.sortOrder !== "asc";
+    table.dataset.sortOrder = isAscending ? "asc" : "desc";
+
+    // Сортируем строки
+    rows.sort((rowA, rowB) => {
+        const cellA = rowA.cells[columnIndex].textContent.trim();
+        const cellB = rowB.cells[columnIndex].textContent.trim();
+
+        // Проверяем, являются ли значения числами
+        const valueA = parseFloat(cellA);
+        const valueB = parseFloat(cellB);
+
+        if (!isNaN(valueA) && !isNaN(valueB)) {
+            // Если оба значения числа, сравниваем их как числа
+            return isAscending ? valueA - valueB : valueB - valueA;
+        } else {
+            // Если значения строки, сравниваем их как строки
+            return isAscending ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+        }
+    });
+
+    // Перестраиваем таблицу
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// Добавляем обработчики событий для заголовков таблицы
+document.addEventListener("DOMContentLoaded", () => {
+    const headers = document.querySelectorAll("#product-table thead th");
+
+    headers.forEach((header, index) => {
+        header.addEventListener("click", () => sortTable(index));
+    });
+});
+
 function formatDate(input) {
     const [datePart, timePart] = input.split('_');
     const [day, month, year] = datePart.split('-');

@@ -21,9 +21,6 @@ body {
     flex-direction: column;
     gap: 20px; /* Расстояние между списком и графиком */
 }
-.radio-button {
-    cursor: pointer;
-}
 #scrollable-table-container {
     max-height: 800px; /* Ограничение высоты */
     overflow-y: auto; /* Вертикальная прокрутка */

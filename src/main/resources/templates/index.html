@@ -32,23 +32,12 @@
             <progress id="loading-bar" value="0" max="100"></progress>
             <p id="loading-text"></p>
         </div>
-
     </div>
-
 
     <!-- Блок справа -->
     <div id="side-container">
         <!-- Список категорий -->
         <div id="category-container">
-            <div id="options">
-                <label class="radio-button">
-                    <input type="radio" name="diffOption" value="min-max" checked onchange="updateDiff()"> min-max
-                </label>
-                <label class="radio-button">
-                    <input type="radio" name="diffOption" value="last-prelast" onchange="updateDiff()"> last-prelast
-                </label>
-            </div>
-
             <h3>Список категорий</h3>
             <ul id="category-list">
                 <li th:each="category : ${data.keySet()}"
