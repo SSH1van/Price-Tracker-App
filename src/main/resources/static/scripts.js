@@ -37,20 +37,40 @@ function showTable(element) {
         for (let i = startIndex; i < rows.length; i++) {
             const [link, valueList] = rows[i];
             let priceText = "Нет данных";
-            let diffText = "Нет данных";
+            let diffSLText = "Нет данных";
+            let percentSLText = "Нет данных";
+            let diffLPText = "Нет данных";
+            let percentLPText = "Нет данных";
 
             if (valueList.length > 0) {
                 const latestPrice = valueList[valueList.length - 1].price;
                 const initialPrice = valueList[0].price;
                 priceText = latestPrice;
-                diffText = initialPrice - latestPrice;
+                diffSLText = initialPrice - latestPrice;
+                percentSLText = diffSLText * 100 / priceText;
+                percentSLText = parseFloat(percentSLText.toFixed(1));
+
+                let penultimatePrice;
+                if (valueList.length !== 1) {
+                    penultimatePrice = valueList[valueList.length - 2].price;
+                } else {
+                    penultimatePrice = latestPrice;
+                }
+
+                diffLPText = penultimatePrice - latestPrice;
+                percentLPText = diffLPText * 100 / priceText;
+                percentLPText = parseFloat(percentLPText.toFixed(1));
+
             }
 
             htmlRows += `
                 <tr>
                     <td>${link}</td>
                     <td>${priceText}</td>
-                    <td>${diffText}</td>
+                    <td>${diffSLText}</td>
+                    <td>${percentSLText}</td>
+                    <td>${diffLPText}</td>
+                    <td>${percentLPText}</td>
                 </tr>
             `;
 
