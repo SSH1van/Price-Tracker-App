@@ -74,3 +74,86 @@ function showTable(element) {
     // Запускаем обработку с первой строки
     processRows(0);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const tableBody = document.querySelector('#product-table tbody');
+
+    // Проверяем, что `data` доступно
+    if (typeof data !== 'object') {
+        console.error('Данные для продуктов не найдены');
+        return;
+    }
+
+    // Добавляем обработчик событий на таблицу
+    tableBody.addEventListener('click', (event) => {
+        const selectedTableId = document.getElementById('selected-table').textContent.trim();
+
+        // Проверяем существование таблицы и данных для этой таблицы
+        if (!data[selectedTableId]) {
+            console.error(`Данные для таблицы "${selectedTableId}" не найдены`);
+            return;
+        }
+
+        const row = event.target.closest('tr');
+        if (row) {
+            // Получаем продукт из первой ячейки строки
+            const product = row.cells[0].textContent.trim();
+            if (data[selectedTableId][product]) {
+                showChart(selectedTableId, product); // Отображаем график для выбранного продукта
+            } else {
+                console.error(`Данные для продукта "${product}" не найдены`);
+            }
+        }
+    });
+});
+
+function formatDate(input) {
+    const [datePart, timePart] = input.split('_');
+    const [day, month, year] = datePart.split('-');
+    const [hour, minute, second] = timePart.split('-');
+
+    const date = new Date(year, month - 1, day, hour, minute, second);
+
+    return date.toISOString().slice(0, 19);
+}
+
+function showChart(selectedTableId, product) {
+    // Получаем данные для выбранного товара
+    const productData = data[selectedTableId][product] || [];
+
+    const dataset = {
+        label: product,
+        data: productData.map(point => ({
+            x: new Date(formatDate(point.timestamp)), // Временная метка
+            y: point.price // Цена
+        })),
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 2,
+        fill: false
+    };
+
+    // Если график уже существует, обновляем его
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    if (chart) {
+        chart.data.datasets = [dataset];  // Обновляем данные
+        chart.update();
+    } else {
+        // Создаём график, если его нет
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: [dataset] },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { unit: 'day' },
+                        title: { display: true, text: 'Дата' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Цена' }
+                    }
+                }
+            }
+        });
+    }
+}
