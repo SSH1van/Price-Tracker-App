@@ -1,89 +1,77 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
-    <title>График цен</title>
+    <title>Трекер цен</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="/scripts.js" defer></script>
 </head>
 <body>
-<h1>Товары</h1>
-<ul id="productList">
-    <li th:each="product : ${data.keySet()}" th:text="${product}" onclick="showChart(this.textContent)" style="cursor: pointer"></li>
-</ul>
+<div id="main-container">
+    <!-- Таблица -->
+    <div id="table-container">
+        <h3>Данные товаров для таблицы: <span id="selected-table"></span></h3>
+        <div id="scrollable-table-container">
+            <table id="product-table">
+                <thead>
+                <tr>
+                    <th>Ссылка</th>
+                    <th>Последняя цена</th>
+                    <th>Разница цен</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Таблица будет заполняться через JS -->
+                </tbody>
+            </table>
+        </div>
 
-<h2 id="selectedProduct">Выберите товар для просмотра динамики цен</h2>
-<canvas id="priceChart" style="margin: 20px"></canvas>
+        <div id="progress-container" style="display: none">
+            <progress id="loading-bar" value="0" max="100"></progress>
+            <p id="loading-text"></p>
+        </div>
+
+    </div>
+
+
+    <!-- Блок справа -->
+    <div id="side-container">
+        <!-- Список категорий -->
+        <div id="category-container">
+            <div id="options">
+                <label class="radio-button">
+                    <input type="radio" name="diffOption" value="min-max" checked onchange="updateDiff()"> min-max
+                </label>
+                <label class="radio-button">
+                    <input type="radio" name="diffOption" value="last-prelast" onchange="updateDiff()"> last-prelast
+                </label>
+            </div>
+
+            <h3>Список категорий</h3>
+            <ul id="category-list">
+                <li th:each="category : ${data.keySet()}"
+                    th:attr="data-category=${category}"
+                    onclick="showTable(this)">
+                    <a href="javascript:void(0);">
+                        <span th:text="${category}"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- График -->
+        <div id="chart-container">
+            <h3>График</h3>
+            <canvas id="priceChart"></canvas>
+        </div>
+    </div>
+</div>
 
 <script th:inline="javascript">
-    const data = [[${data}]];
-
-    // Ссылка на объект графика
-    let chart;
-
-    function formatDate(input) {
-        const [datePart, timePart] = input.split('_');
-        const [day, month, year] = datePart.split('-');
-        const [hour, minute, second] = timePart.split('-');
-
-        const date = new Date(year, month - 1, day, hour, minute, second);
-
-        const formattedDate = date.toISOString().slice(0, 19);
-
-        return formattedDate;
-    }
-
-    function showChart(product) {
-        // Устанавливаем заголовок
-        document.getElementById('selectedProduct').textContent = `Динамика цен: ${product}`;
-        
-        // Получаем данные для выбранного товара
-        const productData = data[product] || [];
-
-        const dataset = {
-            label: product,
-            data: productData.map(point => ({
-                x: new Date(formatDate(point.timestamp)), // Временная метка
-                y: point.price // Цена
-            })),
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 2,
-            fill: false
-        };
-
-        // Если график уже существует, обновляем его
-        if (chart) {
-            chart.data.datasets = [dataset];
-            chart.update();
-        } else {
-            // Создаём график
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: { datasets: [dataset] },
-                options: {
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                            },
-                            title: {
-                                display: true,
-                                text: 'Дата'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Цена'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    }
+    const data = /*[[${data}]]*/ {};
 </script>
+
 </body>
 </html>
