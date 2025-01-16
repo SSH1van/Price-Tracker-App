@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 public class DataService {
 
     private void extractTableData(Connection conn, String tableName, String timestamp, Map<String, Map<String, List<Map<String, Object>>>> data) {
-        String query = "SELECT price, link FROM " + tableName;
+        String query = "SELECT price, link FROM \"" + tableName + "\"";
         try (PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 

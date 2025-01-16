@@ -65,7 +65,7 @@ function showTable(element) {
 
             htmlRows += `
                 <tr>
-                    <td>${link}</td>
+                    <td><a href="${link}" target="_blank">${link}</a></td>
                     <td>${priceText}</td>
                     <td>${diffSLText}</td>
                     <td>${percentSLText}</td>
