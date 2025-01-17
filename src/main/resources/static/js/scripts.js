@@ -265,7 +265,7 @@ function showChart(selectedTableId, product) {
     const productData = data[selectedTableId][product] || [];
 
     const dataset = {
-        label: product,
+        label: "product",
         data: productData.map(point => ({
             x: new Date(formatDate(point.timestamp)), // Временная метка
             y: point.price // Цена
