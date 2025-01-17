@@ -10,6 +10,15 @@ function showTable(element) {
     const progressContainer = document.getElementById("progress-container");
     const selectedOption = document.querySelector('input[name="diffOption"]:checked');
 
+    // Получение значений слайдеров
+    const currentPriceSlider = document.querySelectorAll("#sliders div:nth-child(1) input[type='range']");
+    const priceDiffSlider = document.querySelectorAll("#sliders div:nth-child(2) input[type='range']");
+
+    const minCurrentPrice = parseFloat(currentPriceSlider[0].value);
+    const maxCurrentPrice = parseFloat(currentPriceSlider[1].value);
+    const minPriceDiff = parseFloat(priceDiffSlider[0].value);
+    const maxPriceDiff = parseFloat(priceDiffSlider[1].value);
+
     // Очистка старых данных
     table.innerHTML = "";
 
@@ -35,6 +44,8 @@ function showTable(element) {
 
     let htmlRows = "";
 
+    let minPrice = Infinity, maxPrice = -Infinity;
+    let minDiff = Infinity, maxDiff = -Infinity;
 
     // Функция обработки строк с задержкой каждые 5%
     function processRows(startIndex) {
@@ -43,6 +54,7 @@ function showTable(element) {
             let priceText = "Нет данных";
             let diffText = "Нет данных";
             let percentText = "Нет данных";
+            let isRowValid = true;
 
             if (valueList.length > 0) {
                 const latestPrice = valueList[valueList.length - 1].price;
@@ -66,16 +78,30 @@ function showTable(element) {
                     percentText = diffText * 100 / latestPrice;
                     percentText = parseFloat(percentText.toFixed(1));
                 }
+
+                minPrice = Math.min(minPrice, latestPrice);
+                maxPrice = Math.max(maxPrice, latestPrice);
+                minDiff = Math.min(minDiff, diffText);
+                maxDiff = Math.max(maxDiff, diffText);
+
+                if (
+                    (latestPrice < minCurrentPrice || latestPrice > maxCurrentPrice) || // Фильтр по текущей цене
+                    (diffText < minPriceDiff || diffText > maxPriceDiff) // Фильтр по разнице цен
+                ) {
+                    isRowValid = false;
+                }
             }
 
-            htmlRows += `
-                <tr>
-                    <td><a href="${link}" target="_blank">${link}</a></td>
-                    <td>${priceText}</td>
-                    <td>${diffText}</td>
-                    <td>${percentText}</td>
-                </tr>
-            `;
+            if (isRowValid) {
+                htmlRows += `
+                    <tr>
+                        <td><a href="${link}" target="_blank">${link}</a></td>
+                        <td>${priceText}</td>
+                        <td>${diffText}</td>
+                        <td>${percentText}</td>
+                    </tr>
+                `;
+            }
 
             // Обновляем прогресс и делаем задержку каждые updateStep строк
             if ((i + 1) % updateStep === 0 || i === rows.length - 1) {
@@ -86,6 +112,7 @@ function showTable(element) {
                     setTimeout(() => processRows(i + 1), 0);
                 } else {
                     // Если обработка завершена, обновляем таблицу и скрываем прогресс
+                    updateSliders(minPrice, maxPrice, minDiff, maxDiff);
                     table.innerHTML = htmlRows;
                     progressContainer.style.display = "none";
                 }
@@ -96,6 +123,48 @@ function showTable(element) {
 
     // Запускаем обработку с первой строки
     processRows(0);
+}
+
+function updateSliders(minPrice, maxPrice, minDiff, maxDiff) {
+    // Обновляем диапазон "Текущая цена"
+    const currentPriceSliders = document.querySelectorAll("#sliders > div:nth-child(1) input[type='range']");
+    if (currentPriceSliders.length === 2) {
+        currentPriceSliders[0].min = minPrice;
+        currentPriceSliders[0].max = maxPrice;
+        if (currentPriceSliders[0].value > maxPrice)
+            currentPriceSliders[0].value = maxPrice;
+        else if (currentPriceSliders[0].value < minPrice)
+            currentPriceSliders[0].value = minPrice;
+
+        currentPriceSliders[1].min = minPrice;
+        currentPriceSliders[1].max = maxPrice;
+        if (currentPriceSliders[1].value > maxPrice)
+            currentPriceSliders[1].value = maxPrice;
+        else if (currentPriceSliders[1].value < minPrice)
+            currentPriceSliders[1].value = minPrice;
+
+        currentPriceSliders[0].oninput();
+    }
+
+    // Обновляем диапазон "Разница цен"
+    const priceDiffSliders = document.querySelectorAll("#sliders > div:nth-child(2) input[type='range']");
+    if (priceDiffSliders.length === 2) {
+        priceDiffSliders[0].min = minDiff;
+        priceDiffSliders[0].max = maxDiff;
+        if (priceDiffSliders[0].value > maxDiff)
+            priceDiffSliders[0].value = maxDiff;
+        else if (priceDiffSliders[0].value < minDiff)
+            priceDiffSliders[0].value = minDiff;
+
+        priceDiffSliders[1].min = minDiff;
+        priceDiffSliders[1].max = maxDiff;
+        if (priceDiffSliders[1].value > maxDiff)
+            priceDiffSliders[1].value = maxDiff;
+        else if (priceDiffSliders[1].value < minDiff)
+            priceDiffSliders[1].value = minDiff;
+
+        priceDiffSliders[0].oninput();
+    }
 }
 
 function updateDiff() {
