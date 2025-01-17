@@ -87,3 +87,13 @@ th {
     width: 100%;
     font-size: 16px;
 }
+#apply-button {
+    font-size: 16px;
+}
+#apply-container {
+    display: flex;
+    justify-content: center;
+}
+#apply-button.enabled {
+    cursor: pointer;
+}

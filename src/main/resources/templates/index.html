@@ -2,13 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <title>Трекер цен</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="slider.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/slider.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <script src="/scripts.js" defer></script>
-    <script src="/slider.js" defer></script>
+    <script src="/js/scripts.js" defer></script>
+    <script src="/js/slider.js" defer></script>
 </head>
 <body>
 <div id="main-container">
@@ -41,7 +41,7 @@
     <div id="side-container">
         <!-- Переключение режима разницы цен -->
         <div id="options">
-            <h3>Отображаемое в таблице соотношение цен:</h3>
+            <h3>Отображаемая в таблице разница цен:</h3>
             <label class="radio-button">
                 <input type="radio" name="diffOption" value="start-last" checked="checked" onchange="updateDiff()"> первая-последняя
             </label>
@@ -51,14 +51,14 @@
         </div>
 
         <!-- Слайдеры цен -->
-        <h3>Фильтр цен:</h3>
+        <h3>Фильтр цен в диапазоне:</h3>
         <div id="sliders">
             <div>
                 <section class="range-slider">
                     <label>Последняя цена:</label>
                     <span class="rangeValues"></span>
-                    <input value="0" min="0" max="50000" step="10" type="range">
-                    <input value="50000" min="500" max="50000" step="10" type="range">
+                    <input value="0" min="0" max="50000" step="1" type="range">
+                    <input value="50000" min="500" max="50000" step="1" type="range">
                 </section>
             </div>
 
@@ -66,8 +66,8 @@
                 <section class="range-slider">
                     <label>Разница цен:</label>
                     <span class="rangeValues"></span>
-                    <input value="0" min="0" max="50000" step="10" type="range">
-                    <input value="50000" min="500" max="50000" step="10" type="range">
+                    <input value="0" min="0" max="50000" step="1" type="range">
+                    <input value="50000" min="500" max="50000" step="1" type="range">
                 </section>
             </div>
         </div>
@@ -76,6 +76,10 @@
         <div>
             <h3>Фильтр ссылок:</h3>
             <input type="text" id="filterInput" placeholder="Введите текст для фильтрации...">
+        </div>
+
+        <div id="apply-container">
+            <button id="apply-button" disabled>Применить фильтры</button>
         </div>
 
         <!-- Список категорий -->

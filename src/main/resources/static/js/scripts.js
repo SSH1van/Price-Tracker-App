@@ -1,9 +1,13 @@
 // Ссылка на объект графика
 let chart;
 let temp_element;
+const apply_button = document.getElementById('apply-button');
 
 function showTable(element) {
+    apply_button.disabled = false;
+    apply_button.classList.add('enabled');
     temp_element = element;
+
     const category = element.getAttribute("data-category");
     const table = document.getElementById("product-table").getElementsByTagName("tbody")[0];
     const progressBar = document.getElementById("loading-bar");
@@ -128,6 +132,10 @@ function showTable(element) {
     // Запускаем обработку с первой строки
     processRows(0);
 }
+
+apply_button.addEventListener('click', function () {
+    showTable(temp_element);
+});
 
 function updateSliders(minPrice, maxPrice, minDiff, maxDiff) {
     // Функция для обновления диапазона и значений слайдеров
