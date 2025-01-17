@@ -7,7 +7,7 @@ body {
 
 #main-container {
     display: grid;
-    grid-template-columns: 2fr 1fr; /* Таблица слева, категории и график справа */
+    grid-template-columns: 3fr 1fr; /* Таблица слева, категории и график справа */
     gap: 20px;
     width: 90%;
     margin-top: 20px;
@@ -81,4 +81,9 @@ th {
 }
 #chart-container canvas {
     max-width: 100%; /* График адаптируется по ширине */
+}
+
+#filterInput {
+    width: 100%;
+    font-size: 16px;
 }

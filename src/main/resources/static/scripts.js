@@ -9,6 +9,7 @@ function showTable(element) {
     const progressBar = document.getElementById("loading-bar");
     const progressContainer = document.getElementById("progress-container");
     const selectedOption = document.querySelector('input[name="diffOption"]:checked');
+    const filterInput = document.getElementById("filterInput");
 
     // Получение значений слайдеров
     const currentPriceSlider = document.querySelectorAll("#sliders div:nth-child(1) input[type='range']");
@@ -49,6 +50,8 @@ function showTable(element) {
 
     // Функция обработки строк с задержкой каждые 5%
     function processRows(startIndex) {
+        const filterText = filterInput.value.toLowerCase();
+
         for (let i = startIndex; i < rows.length; i++) {
             const [link, valueList] = rows[i];
             let priceText = "Нет данных";
@@ -86,7 +89,8 @@ function showTable(element) {
 
                 if (
                     (latestPrice < minCurrentPrice || latestPrice > maxCurrentPrice) || // Фильтр по текущей цене
-                    (diffText < minPriceDiff || diffText > maxPriceDiff) // Фильтр по разнице цен
+                    (diffText < minPriceDiff || diffText > maxPriceDiff) || // Фильтр по разнице цен
+                    (filterText && !link.toLowerCase().includes(filterText))
                 ) {
                     isRowValid = false;
                 }
@@ -126,45 +130,25 @@ function showTable(element) {
 }
 
 function updateSliders(minPrice, maxPrice, minDiff, maxDiff) {
+    // Функция для обновления диапазона и значений слайдеров
+    function updateSliderRange(sliders, min, max) {
+        if (sliders.length === 2) {
+            sliders.forEach(slider => {
+                slider.min = min;
+                slider.max = max;
+                slider.value = Math.min(Math.max(slider.value, min), max);
+            });
+            sliders[0].oninput();
+        }
+    }
+
     // Обновляем диапазон "Текущая цена"
     const currentPriceSliders = document.querySelectorAll("#sliders > div:nth-child(1) input[type='range']");
-    if (currentPriceSliders.length === 2) {
-        currentPriceSliders[0].min = minPrice;
-        currentPriceSliders[0].max = maxPrice;
-        if (currentPriceSliders[0].value > maxPrice)
-            currentPriceSliders[0].value = maxPrice;
-        else if (currentPriceSliders[0].value < minPrice)
-            currentPriceSliders[0].value = minPrice;
-
-        currentPriceSliders[1].min = minPrice;
-        currentPriceSliders[1].max = maxPrice;
-        if (currentPriceSliders[1].value > maxPrice)
-            currentPriceSliders[1].value = maxPrice;
-        else if (currentPriceSliders[1].value < minPrice)
-            currentPriceSliders[1].value = minPrice;
-
-        currentPriceSliders[0].oninput();
-    }
+    updateSliderRange(currentPriceSliders, minPrice, maxPrice);
 
     // Обновляем диапазон "Разница цен"
     const priceDiffSliders = document.querySelectorAll("#sliders > div:nth-child(2) input[type='range']");
-    if (priceDiffSliders.length === 2) {
-        priceDiffSliders[0].min = minDiff;
-        priceDiffSliders[0].max = maxDiff;
-        if (priceDiffSliders[0].value > maxDiff)
-            priceDiffSliders[0].value = maxDiff;
-        else if (priceDiffSliders[0].value < minDiff)
-            priceDiffSliders[0].value = minDiff;
-
-        priceDiffSliders[1].min = minDiff;
-        priceDiffSliders[1].max = maxDiff;
-        if (priceDiffSliders[1].value > maxDiff)
-            priceDiffSliders[1].value = maxDiff;
-        else if (priceDiffSliders[1].value < minDiff)
-            priceDiffSliders[1].value = minDiff;
-
-        priceDiffSliders[0].oninput();
-    }
+    updateSliderRange(priceDiffSliders, minDiff, maxDiff);
 }
 
 function updateDiff() {
