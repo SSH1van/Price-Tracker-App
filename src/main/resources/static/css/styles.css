@@ -28,6 +28,13 @@ body {
     flex-direction: column;
     gap: 20px; /* Расстояние между списком и графиком */
 }
+#options {
+    display: grid;
+}
+.radio-button {
+    cursor: pointer;
+    margin-top: 10px;
+}
 #scrollable-table-container {
     max-height: 800px; /* Ограничение высоты */
     overflow-y: auto; /* Вертикальная прокрутка */
