@@ -1,11 +1,14 @@
 // Ссылка на объект графика
 let chart;
+let temp_element;
 
 function showTable(element) {
+    temp_element = element;
     const category = element.getAttribute("data-category");
     const table = document.getElementById("product-table").getElementsByTagName("tbody")[0];
     const progressBar = document.getElementById("loading-bar");
     const progressContainer = document.getElementById("progress-container");
+    const selectedOption = document.querySelector('input[name="diffOption"]:checked');
 
     // Очистка старых данных
     table.innerHTML = "";
@@ -32,45 +35,45 @@ function showTable(element) {
 
     let htmlRows = "";
 
+
     // Функция обработки строк с задержкой каждые 5%
     function processRows(startIndex) {
         for (let i = startIndex; i < rows.length; i++) {
             const [link, valueList] = rows[i];
             let priceText = "Нет данных";
-            let diffSLText = "Нет данных";
-            let percentSLText = "Нет данных";
-            let diffLPText = "Нет данных";
-            let percentLPText = "Нет данных";
+            let diffText = "Нет данных";
+            let percentText = "Нет данных";
 
             if (valueList.length > 0) {
                 const latestPrice = valueList[valueList.length - 1].price;
                 const initialPrice = valueList[0].price;
-                priceText = latestPrice;
-                diffSLText = initialPrice - latestPrice;
-                percentSLText = diffSLText * 100 / priceText;
-                percentSLText = parseFloat(percentSLText.toFixed(1));
-
                 let penultimatePrice;
+
                 if (valueList.length !== 1) {
                     penultimatePrice = valueList[valueList.length - 2].price;
                 } else {
                     penultimatePrice = latestPrice;
                 }
 
-                diffLPText = penultimatePrice - latestPrice;
-                percentLPText = diffLPText * 100 / priceText;
-                percentLPText = parseFloat(percentLPText.toFixed(1));
+                priceText = latestPrice;
 
+                if (selectedOption && selectedOption.value.includes("start-last")) {
+                    diffText = initialPrice - latestPrice;
+                    percentText = diffText * 100 / latestPrice;
+                    percentText = parseFloat(percentText.toFixed(1));
+                } else {
+                    diffText = penultimatePrice - latestPrice;
+                    percentText = diffText * 100 / latestPrice;
+                    percentText = parseFloat(percentText.toFixed(1));
+                }
             }
 
             htmlRows += `
                 <tr>
                     <td><a href="${link}" target="_blank">${link}</a></td>
                     <td>${priceText}</td>
-                    <td>${diffSLText}</td>
-                    <td>${percentSLText}</td>
-                    <td>${diffLPText}</td>
-                    <td>${percentLPText}</td>
+                    <td>${diffText}</td>
+                    <td>${percentText}</td>
                 </tr>
             `;
 
@@ -93,6 +96,20 @@ function showTable(element) {
 
     // Запускаем обработку с первой строки
     processRows(0);
+}
+
+function updateDiff() {
+    const radioButtons = document.querySelectorAll('input[name="diffOption"]');
+
+    radioButtons.forEach((radioButton) => {
+        if (radioButton.checked) {
+            radioButton.setAttribute('checked', 'checked');
+        } else {
+            radioButton.removeAttribute('checked');
+        }
+    });
+
+    showTable(temp_element);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
