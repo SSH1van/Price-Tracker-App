@@ -78,11 +78,14 @@ function showTable(element) {
 
                 if (selectedOption && selectedOption.value.includes("start-last")) {
                     diffText = initialPrice - latestPrice;
-                    percentText = diffText * 100 / latestPrice;
+                    percentText = (diffText * 100) / initialPrice;
                     percentText = parseFloat(percentText.toFixed(1));
+                    if (diffText === 49968) {
+                        console.log(initialPrice, latestPrice, diffText, percentText)
+                    }
                 } else {
                     diffText = penultimatePrice - latestPrice;
-                    percentText = diffText * 100 / latestPrice;
+                    percentText = (diffText * 100) / penultimatePrice;
                     percentText = parseFloat(percentText.toFixed(1));
                 }
 
