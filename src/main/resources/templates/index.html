@@ -3,10 +3,12 @@
 <head>
     <title>Трекер цен</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="slider.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="/scripts.js" defer></script>
+    <script src="/slider.js" defer></script>
 </head>
 <body>
 <div id="main-container">
@@ -37,6 +39,7 @@
 
     <!-- Блок справа -->
     <div id="side-container">
+        <!-- Переключение режима разницы цен -->
         <div id="options">
             <h3>Отображаемое в таблице соотношение цен:</h3>
             <label class="radio-button">
@@ -45,6 +48,26 @@
             <label class="radio-button">
                 <input type="radio" name="diffOption" value="penultimate-last" onchange="updateDiff()"> предпоследняя-последняя
             </label>
+        </div>
+
+        <div id="sliders">
+            <div>
+                <section class="range-slider">
+                    <label>Текущая цена:</label>
+                    <span class="rangeValues"></span>
+                    <input value="0" min="0" max="50000" step="500" type="range">
+                    <input value="50000" min="500" max="50000" step="500" type="range">
+                </section>
+            </div>
+
+            <div>
+                <section class="range-slider">
+                    <label>Разница цен:</label>
+                    <span class="rangeValues"></span>
+                    <input value="0" min="0" max="50000" step="500" type="range">
+                    <input value="50000" min="500" max="50000" step="500" type="range">
+                </section>
+            </div>
         </div>
 
         <!-- Список категорий -->
