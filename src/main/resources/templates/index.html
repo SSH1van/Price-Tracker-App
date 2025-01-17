@@ -12,97 +12,101 @@
 </head>
 <body>
 <div id="main-container">
-    <!-- Таблица -->
-    <div id="table-container">
-        <h3>Данные товаров для таблицы: <span id="selected-table"></span></h3>
-        <div id="scrollable-table-container">
-            <table id="product-table">
-                <thead>
-                <tr>
-                    <th>Ссылка</th>
-                    <th>Последняя цена</th>
-                    <th>Разница цен</th>
-                    <th>%</th>
-                </tr>
-                </thead>
-                <tbody>
-                <!-- Таблица будет заполняться через JS -->
-                </tbody>
-            </table>
-        </div>
-
-        <div id="progress-container" style="display: none">
-            <progress id="loading-bar" value="0" max="100"></progress>
-            <p id="loading-text"></p>
-        </div>
+    <!-- Список категорий -->
+    <div id="category-container">
+        <h3>Список категорий</h3>
+        <ul id="category-list">
+            <li th:each="category : ${data.keySet()}"
+                th:attr="data-category=${category}"
+                onclick="showTable(this)">
+                <a href="javascript:void(0);">
+                    <span th:text="${category}"></span>
+                </a>
+            </li>
+        </ul>
     </div>
 
-    <!-- Блок справа -->
-    <div id="side-container">
-        <!-- Переключение режима разницы цен -->
-        <div id="options">
-            <h3>Отображаемая в таблице разница цен:</h3>
-            <label class="radio-button">
-                <input type="radio" name="diffOption" value="start-last" checked="checked" onchange="updateDiff()"> первая-последняя
-            </label>
-            <label class="radio-button">
-                <input type="radio" name="diffOption" value="penultimate-last" onchange="updateDiff()"> предпоследняя-последняя
-            </label>
-        </div>
-
-        <!-- Слайдеры цен -->
-        <h3>Фильтр цен в диапазоне:</h3>
-        <div id="sliders">
-            <div>
-                <section class="range-slider">
-                    <label>Последняя цена:</label>
-                    <span class="rangeValues"></span>
-                    <input value="0" min="0" max="50000" step="1" type="range">
-                    <input value="50000" min="500" max="50000" step="1" type="range">
-                </section>
+    <div id="table-side-container">
+        <!-- Таблица -->
+        <div id="table-container">
+            <h3>Данные товаров для таблицы: <span id="selected-table"></span></h3>
+            <div id="scrollable-table-container">
+                <table id="product-table">
+                    <thead>
+                    <tr>
+                        <th>Ссылка</th>
+                        <th>Последняя цена</th>
+                        <th>Разница цен</th>
+                        <th>%</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Таблица будет заполняться через JS -->
+                    </tbody>
+                </table>
             </div>
 
-            <div>
-                <section class="range-slider">
-                    <label>Разница цен:</label>
-                    <span class="rangeValues"></span>
-                    <input value="0" min="0" max="50000" step="1" type="range">
-                    <input value="50000" min="500" max="50000" step="1" type="range">
-                </section>
+            <div id="progress-container" style="display: none">
+                <progress id="loading-bar" value="0" max="100"></progress>
+                <p id="loading-text"></p>
             </div>
         </div>
 
-        <!-- Фильтр ссылок -->
-        <div>
-            <h3>Фильтр ссылок:</h3>
-            <input type="text" id="filterInput" placeholder="Введите текст для фильтрации...">
-        </div>
+        <!-- Блок справа -->
+        <div id="side-container">
+            <!-- Переключение режима разницы цен -->
+            <div id="options">
+                <h3>Отображаемая в таблице разница цен:</h3>
+                <label class="radio-button">
+                    <input type="radio" name="diffOption" value="start-last" checked="checked" onchange="updateDiff()"> первая-последняя
+                </label>
+                <label class="radio-button">
+                    <input type="radio" name="diffOption" value="penultimate-last" onchange="updateDiff()"> предпоследняя-последняя
+                </label>
+            </div>
 
-        <div id="apply-container">
-            <button id="apply-button" disabled>Применить фильтры</button>
-        </div>
+            <!-- Слайдеры цен -->
+            <h3>Фильтр цен в диапазоне:</h3>
+            <div id="sliders">
+                <div>
+                    <section class="range-slider">
+                        <label>Последняя цена:</label>
+                        <span class="rangeValues"></span>
+                        <input value="0" min="0" max="50000" step="1" type="range">
+                        <input value="50000" min="500" max="50000" step="1" type="range">
+                    </section>
+                </div>
 
-        <!-- Список категорий -->
-        <div id="category-container">
-            <h3>Список категорий</h3>
-            <ul id="category-list">
-                <li th:each="category : ${data.keySet()}"
-                    th:attr="data-category=${category}"
-                    onclick="showTable(this)">
-                    <a href="javascript:void(0);">
-                        <span th:text="${category}"></span>
-                    </a>
-                </li>
-            </ul>
-        </div>
+                <div>
+                    <section class="range-slider">
+                        <label>Разница цен:</label>
+                        <span class="rangeValues"></span>
+                        <input value="0" min="0" max="50000" step="1" type="range">
+                        <input value="50000" min="500" max="50000" step="1" type="range">
+                    </section>
+                </div>
+            </div>
 
-        <!-- График -->
-        <div id="chart-container">
-            <h3>График</h3>
-            <canvas id="priceChart"></canvas>
+            <!-- Фильтр ссылок -->
+            <div>
+                <h3>Фильтр ссылок:</h3>
+                <input type="text" id="filterInput" placeholder="Введите текст для фильтрации...">
+            </div>
+
+            <div id="apply-container">
+                <button id="apply-button" disabled>Применить фильтры</button>
+            </div>
+
+            <!-- График -->
+            <div id="chart-container">
+                <h3>График</h3>
+                <canvas id="priceChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
+
+
 
 <script th:inline="javascript">
     const data = /*[[${data}]]*/ {};

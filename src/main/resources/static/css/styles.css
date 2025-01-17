@@ -4,13 +4,20 @@ body {
     align-items: center;
     font-family: Arial, sans-serif;
 }
-
 #main-container {
+    display: grid;
+    grid-template-columns: 1fr 5fr; /* Таблица слева, категории и график справа */
+    gap: 20px;
+    width: 95%;
+    margin-top: 20px;
+}
+
+#table-side-container {
     display: grid;
     grid-template-columns: 3fr 1fr; /* Таблица слева, категории и график справа */
     gap: 20px;
-    width: 90%;
-    margin-top: 20px;
+    /*width: 90%;*/
+    /*margin-top: 20px;*/
 }
 #table-container {
     grid-column: 1; /* Таблица занимает первую колонку */
