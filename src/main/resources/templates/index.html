@@ -11,6 +11,7 @@
     <script src="/js/slider.js" defer></script>
 </head>
 <body>
+
 <div id="main-container">
     <!-- Список категорий -->
     <div id="category-container">
@@ -26,10 +27,11 @@
         </ul>
     </div>
 
-    <div id="table-side-container">
-        <!-- Таблица -->
+    <!-- Контейнер контента (таблица, фильтры, график) -->
+    <section id="content-container">
+        <!-- Блок таблицы товаров -->
         <div id="table-container">
-            <h3>Данные товаров для таблицы: <span id="selected-table"></span></h3>
+            <h3>Таблица товаров: <span id="selected-table"></span></h3>
             <div id="scrollable-table-container">
                 <table id="product-table">
                     <thead>
@@ -41,31 +43,32 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- Таблица будет заполняться через JS -->
+                    <!-- Данные загружаются через JS -->
                     </tbody>
                 </table>
             </div>
 
+            <!-- Индикатор загрузки -->
             <div id="progress-container" style="display: none">
                 <progress id="loading-bar" value="0" max="100"></progress>
                 <p id="loading-text"></p>
             </div>
         </div>
 
-        <!-- Блок справа -->
-        <div id="side-container">
-            <!-- Переключение режима разницы цен -->
-            <div id="options">
-                <h3>Отображаемая в таблице разница цен:</h3>
+        <!-- Блок фильтров -->
+        <aside id="filters-container">
+            <!-- Выбор режима сравнения цен -->
+            <div id="price-diff-options">
+                <h3>Выбор режима сравнения цен:</h3>
                 <label class="radio-button">
-                    <input type="radio" name="diffOption" value="start-last" checked="checked" onchange="updateDiff()"> первая-последняя
+                    <input type="radio" name="diffOption" value="start-last" checked="checked" onchange="updateDiff()"> Первая-последняя
                 </label>
                 <label class="radio-button">
-                    <input type="radio" name="diffOption" value="penultimate-last" onchange="updateDiff()"> предпоследняя-последняя
+                    <input type="radio" name="diffOption" value="penultimate-last" onchange="updateDiff()"> Предпоследняя-последняя
                 </label>
             </div>
 
-            <!-- Слайдеры цен -->
+            <!-- Фильтр цен -->
             <h3>Фильтр цен в диапазоне:</h3>
             <div id="sliders">
                 <div>
@@ -76,7 +79,6 @@
                         <input value="50000" min="500" max="50000" step="1" type="range">
                     </section>
                 </div>
-
                 <div>
                     <section class="range-slider">
                         <label>Разница цен:</label>
@@ -97,17 +99,16 @@
                 <button id="apply-button" disabled>Применить фильтры</button>
             </div>
 
-            <!-- График -->
+            <!-- График изменения цен -->
             <div id="chart-container">
-                <h3>График</h3>
+                <h3>График изменения цен</h3>
                 <canvas id="priceChart"></canvas>
             </div>
-        </div>
-    </div>
+        </aside>
+    </section>
 </div>
 
-
-
+<!-- Подгрузка данных извлечённых из таблицы -->
 <script th:inline="javascript">
     const data = /*[[${data}]]*/ {};
 </script>
