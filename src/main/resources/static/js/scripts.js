@@ -19,10 +19,17 @@ function showTable(element) {
     const currentPriceSlider = document.querySelectorAll("#sliders div:nth-child(1) input[type='range']");
     const priceDiffSlider = document.querySelectorAll("#sliders div:nth-child(2) input[type='range']");
 
-    const minCurrentPrice = parseFloat(currentPriceSlider[0].value);
-    const maxCurrentPrice = parseFloat(currentPriceSlider[1].value);
-    const minPriceDiff = parseFloat(priceDiffSlider[0].value);
-    const maxPriceDiff = parseFloat(priceDiffSlider[1].value);
+    let minCurrentPrice = parseFloat(currentPriceSlider[0].value);
+    let maxCurrentPrice = parseFloat(currentPriceSlider[1].value);
+    if (minCurrentPrice > maxCurrentPrice) {
+        [minCurrentPrice, maxCurrentPrice] = [maxCurrentPrice, minCurrentPrice];
+    }
+
+    let minPriceDiff = parseFloat(priceDiffSlider[0].value);
+    let maxPriceDiff = parseFloat(priceDiffSlider[1].value);
+    if (minPriceDiff > maxPriceDiff) {
+        [minPriceDiff, maxPriceDiff] = [maxPriceDiff, minPriceDiff];
+    }
 
     // Очистка старых данных
     table.innerHTML = "";
@@ -147,7 +154,6 @@ function updateSliders(minPrice, maxPrice, minDiff, maxDiff) {
             sliders.forEach(slider => {
                 slider.min = min;
                 slider.max = max;
-                slider.value = Math.min(Math.max(slider.value, min), max);
             });
             sliders[0].oninput();
         }
