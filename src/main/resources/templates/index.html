@@ -27,7 +27,7 @@
         <ul id="category-list">
             <li th:each="category : ${data.keySet()}"
                 th:attr="data-category=${category}">
-                <a href="javascript:void(0);">
+                <a>
                     <span th:text="${category}"></span>
                 </a>
             </li>
