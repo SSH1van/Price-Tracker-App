@@ -218,8 +218,7 @@ function sortTable(columnIndex) {
     const rows = Array.from(tbody.rows);
 
     // Определяем порядок сортировки: asc (по умолчанию) или desc
-    const isAscending = table.dataset.sortOrder !== "asc";
-    table.dataset.sortOrder = isAscending ? "asc" : "desc";
+    let isAscending = columnIndex === 1;
 
     // Сортируем строки
     rows.sort((rowA, rowB) => {
