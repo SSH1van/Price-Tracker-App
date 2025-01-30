@@ -1,5 +1,6 @@
 let chart;
 let tempElement = null;
+let tempCategoryName = null;
 const applyButton = document.getElementById('apply-button');
 const progressBar = document.getElementById("loading-bar");
 const progressContainer = document.getElementById("progress-container");
@@ -8,23 +9,33 @@ const table = document.getElementById("product-table").getElementsByTagName("tbo
 const header = document.getElementById("selected-table");
 
 // Отображает таблицу товаров для выбранной категории
-function showTable(element) {
-    if (element === null) return;
+function showTable(elements, categoryName) {
+    if (!elements || elements.length === 0) return;
 
     applyButton.disabled = false;
-    tempElement = element;
+    tempElement = elements;
+    tempCategoryName = categoryName;
 
-    // Установка заголовка и очистка старых данных
-    const category = element.getAttribute("data-category");
-    header.textContent = category;
+    // Обновляем заголовок
+    header.textContent = categoryName;
+
+    // Очистка таблицы
     table.innerHTML = "";
 
-    // Получение данных
-    const categoryData = data[category];
-    const rows = Object.entries(categoryData);
+    // Объединяем данные всех переданных категорий
+    let allRows = [];
 
-    setupProgressBar(rows.length);
-    processRows(rows)
+    elements.forEach(element => {
+        const category = element.getAttribute("data-category");
+        const categoryData = data[category];
+
+        if (categoryData) {
+            allRows = allRows.concat(Object.entries(categoryData));
+        }
+    });
+
+    setupProgressBar(allRows.length);
+    processRows(allRows);
 }
 
 // Настраивает прогресс-бар
@@ -138,7 +149,7 @@ function updateSliderRange(selector, min, max) {
 // Применяет выбранный тип сравнения цен
 function updateDiff() {
     document.querySelector('input[name="diffOption"]:checked')?.setAttribute('checked', 'checked');
-    showTable(tempElement);
+    showTable(tempElement, tempCategoryName);
 }
 
 // Сортирует таблицу по указанному столбцу
@@ -218,7 +229,7 @@ function showChart(selectedTableId, product) {
  *            СОБЫТИЯ ДЛЯ ЭЛЕМЕНТОВ             *
  ************************************************/
 // Повторно загружает таблицу при нажатии на кнопку "Применить фильтры".
-applyButton.addEventListener('click', () => showTable(tempElement));
+applyButton.addEventListener('click', () => showTable(tempElement, tempCategoryName));
 
 document.addEventListener('DOMContentLoaded', () => {
     // Сортировка при клике на заголовок таблицы
@@ -232,7 +243,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!row) return;
 
         const product = row.cells[0].textContent.trim();
-        const selectedTableId = header.textContent.trim();
+        let selectedTableId = header.textContent.trim();
+        if (!(selectedTableId in data)) {
+            let exitLoop = false;
+            for (const selectedTable in data) {
+                if (exitLoop) break;
+
+                for (const productUrl in data[selectedTable]) {
+                    if (productUrl === product) {
+                        selectedTableId = selectedTable;
+                        exitLoop = true;
+                        break;
+                    }
+                }
+            }
+        }
 
         if (data[selectedTableId]?.[product]) {
             showChart(selectedTableId, product);
@@ -241,14 +266,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Нажатие на категорию товара
-    document.getElementById('category-list').addEventListener('click', (event) => {
-        const liElement = event.target.closest('li');
-        showTable(liElement);
-    });
-
     // Изменение режима отображения разницы цен
     document.querySelectorAll('#price-diff-options input[name="diffOption"]').forEach(radio => {
         radio.addEventListener('change', updateDiff);
+    });
+
+    // События для категорий товаров
+    document.getElementById('category-list').addEventListener('click', (event) => {
+        const toggleBtn = event.target.closest('.toggle-btn');
+        const categoryItem = event.target.closest('li');
+
+        if (!categoryItem) return;
+
+        if (toggleBtn) {
+            // Переключение раскрытия подкатегорий
+            categoryItem.classList.toggle('open');
+            toggleBtn.textContent = categoryItem.classList.contains('open') ? '▼' : '▶';
+        } else {
+            // Определяем текст категории
+            let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn)');
+            let categoryName = categoryNameElement ? categoryNameElement.textContent.trim() : "Категория";
+            tempCategoryName = categoryName;
+
+            // Собираем все вложенные элементы с data-category
+            const nestedItems = categoryItem.querySelectorAll('li[data-category]');
+
+            if (nestedItems.length > 0) {
+                // Если кликнули на большую категорию, показываем все вложенные
+                showTable(nestedItems, categoryName);
+            } else if (categoryItem.hasAttribute('data-category')) {
+                // Если это самая глубокая категория, показываем только её
+                showTable([categoryItem], categoryName);
+            }
+        }
     });
 });

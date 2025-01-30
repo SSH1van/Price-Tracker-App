@@ -16,7 +16,9 @@ public class MainController {
     public String index(Model model) {
         String resultsDir = "results"; // путь к директории
         var data = dataService.loadData(resultsDir); // Загружаем данные
+        var categories = dataService.getStructuredCategories(data);
         model.addAttribute("data", data);
+        model.addAttribute("categories", categories);
         return "index";
     }
 }

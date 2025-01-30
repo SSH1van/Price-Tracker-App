@@ -5,6 +5,13 @@ body {
     align-items: center;
     font-family: Arial, sans-serif;
 }
+li {
+    list-style-type: none;
+}
+li::marker {
+    content: '';
+    display: none;
+}
 
 /* ========== Основной контейнер ========== */
 #main-container {
@@ -25,11 +32,43 @@ body {
     margin: 0;
 }
 #category-list li {
-    cursor: pointer;
     padding: 5px;
 }
-#category-list li:hover {
-    background-color: #f4f4f4;
+.category-item strong {
+    padding: 5px;
+}
+.category-item strong:hover {
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+}
+.subcategory-item span:nth-child(2) {
+    padding: 5px;
+}
+.subcategory-item span:nth-child(2):hover {
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+}
+.subcategory-item .nested li:hover {
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* ========== Скрытие вложенных категорий и элементов ========== */
+.nested {
+    display: none;
+    margin-left: 20px;
+}
+.toggle-btn {
+    cursor: pointer;
+    margin-right: 5px;
+    user-select: none;
+    font-size: 14px;
+}
+.open > .nested {
+    display: block;
 }
 
 /* ========== Контент: таблица и фильтры ========== */
