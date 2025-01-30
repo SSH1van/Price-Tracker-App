@@ -12,6 +12,9 @@ li::marker {
     content: '';
     display: none;
 }
+a {
+    text-decoration: none;
+}
 
 /* ========== Основной контейнер ========== */
 #main-container {
@@ -33,9 +36,11 @@ li::marker {
 }
 #category-list li {
     padding: 5px;
+
 }
 .category-item strong {
     padding: 5px;
+    transition: all 0.3s ease;
 }
 .category-item strong:hover {
     background-color: #000;
@@ -44,11 +49,15 @@ li::marker {
 }
 .subcategory-item span:nth-child(2) {
     padding: 5px;
+    transition: all 0.3s ease;
 }
 .subcategory-item span:nth-child(2):hover {
     background-color: #000;
     color: #fff;
     cursor: pointer;
+}
+.subcategory-item .nested li {
+    transition: all 0.3s ease;
 }
 .subcategory-item .nested li:hover {
     background-color: #000;
@@ -99,10 +108,28 @@ th, td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    transition: all 0.3s ease;
 }
 th {
     cursor: pointer;
     background-color: #f4f4f4;
+}
+th:hover {
+    background-color: #fff;
+}
+tr {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+tbody tr:hover {
+    background-color: #DCDCDC;
+}
+td a {
+    color: #000;
+    transition: all 0.3s ease;
+}
+td a:hover {
+    color: #00BFFF;
 }
 
 /* ========== Индикатор загрузки ========== */
@@ -148,8 +175,18 @@ th {
     justify-content: center;
 }
 #apply-button {
+    background-color: #fff;
+    color: #000;
     font-size: 16px;
     cursor: pointer;
+    border-radius: 5px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+#apply-button:hover {
+    background-color: #000;
+    color: #fff;
 }
 
 /* ========== График изменения цен ========== */
