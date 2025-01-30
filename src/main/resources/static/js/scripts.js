@@ -126,7 +126,7 @@ function showTable(element) {
                 if (i < rows.length - 1) {
                     setTimeout(() => processRows(i + 1), 0);
                 } else {
-                    // Если обработка завершена, обновляем таблицу и скрываем прогресс
+                    // Если обработка завершена, обновляем таблицу, слайдеры и скрываем прогресс обработки
                     updateSliders(minPrice, maxPrice, minDiff, maxDiff);
                     table.innerHTML = htmlRows;
                     progressContainer.style.display = "none";
