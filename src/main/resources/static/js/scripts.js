@@ -195,7 +195,7 @@ function showChart(selectedTableId, product) {
             x: new Date(formatDate(point.timestamp)),
             y: point.price
         })),
-        borderColor: 'rgba(75, 192, 192, 1)',
+        borderColor: 'rgba(0, 191, 255, 1)',
         borderWidth: 2,
         fill: false
     };
@@ -210,6 +210,11 @@ function showChart(selectedTableId, product) {
             type: 'line',
             data: { datasets: [dataset] },
             options: {
+                plugins: {
+                    legend: {
+                        display: false // Скрываем легенду
+                    }
+                },
                 scales: {
                     x: {
                         type: 'time',

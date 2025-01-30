@@ -13,29 +13,56 @@ public class DataService {
     public Map<String, Map<String, Map<String, Object>>> getStructuredCategories(Map<String, Map<String, List<Map<String, Object>>>> rawData) {
         Map<String, Map<String, Map<String, Object>>> categoryProducts = new LinkedHashMap<>();
 
-        // Карта соответствия товаров к категориям
-        Map<String, String> categoryMapping = Map.of(
-                "Смартфоны Lenovo", "Телефоны и смарт-часы>Смартфоны",
-                "Смартфоны realme", "Телефоны и смарт-часы>Смартфоны",
-                "Смартфоны Blackview", "Телефоны и смарт-часы>Смартфоны",
-                "Смарт-часы realme", "Телефоны и смарт-часы>Смарт-часы",
-                "Ноутбуки Honor", "Ноутбуки, планшеты и книги>Ноутбуки",
-                "Ноутбуки Apple", "Ноутбуки, планшеты и книги>Ноутбуки",
-                "Электронные книги Digma", "Ноутбуки, планшеты и книги>Электронные книги",
-                "Электронные книги ONYX BOOX", "Ноутбуки, планшеты и книги>Электронные книги"
-        );
+        // Карта соответствия категорий (правой части)
+        Map<String, String> categoryMapping = new HashMap<>(Map.ofEntries(
+                // Телефоны и смарт-часы
+                Map.entry("Смартфоны", "Телефоны и смарт-часы>Смартфоны"),
+                Map.entry("Аксессуары для смартфонов и телефонов", "Телефоны и смарт-часы>Аксессуары для смартфонов и телефонов"),
+                Map.entry("Смарт-часы", "Телефоны и смарт-часы>Смарт-часы"),
+                Map.entry("Фитнес-браслеты", "Телефоны и смарт-часы>Фитнес-браслеты"),
+                Map.entry("Ремешки для смарт-часов и фитнес-браслетов", "Телефоны и смарт-часы>Ремешки для смарт-часов и фитнес-браслетов"),
+                Map.entry("Аксессуары для смарт-часов и фитнес-браслетов", "Телефоны и смарт-часы>Аксессуары для смарт-часов и фитнес-браслетов"),
+                Map.entry("Мобильные телефоны", "Телефоны и смарт-часы>Мобильные телефоны"),
+                Map.entry("Sim-карты", "Телефоны и смарт-часы>Sim-карты"),
+                Map.entry("Запчасти", "Телефоны и смарт-часы>Запчасти"),
+                Map.entry("Проводные и радиотелефоны", "Телефоны и смарт-часы>Проводные и радиотелефоны"),
+
+                // Ноутбуки, планшеты и электронные книги
+                Map.entry("Ноутбуки", "Ноутбуки, планшеты и электронные книги>Ноутбуки"),
+                Map.entry("Игровые ноутбуки", "Ноутбуки, планшеты и электронные книги>Игровые ноутбуки"),
+                Map.entry("Планшеты", "Ноутбуки, планшеты и электронные книги>Планшеты"),
+                Map.entry("Электронные книги", "Ноутбуки, планшеты и электронные книги>Электронные книги"),
+                Map.entry("Графические планшеты", "Ноутбуки, планшеты и электронные книги>Графические планшеты"),
+                Map.entry("Чехлы и подставки для планшетов", "Ноутбуки, планшеты и электронные книги>Чехлы и подставки для планшетов"),
+                Map.entry("Стилусы", "Ноутбуки, планшеты и электронные книги>Стилусы"),
+                Map.entry("Аксессуары для ноутбуков", "Ноутбуки, планшеты и электронные книги>Аксессуары для ноутбуков"),
+                //Map.entry("Запчасти", "Ноутбуки, планшеты и электронные книги>Запчасти"),
+                Map.entry("Аккумуляторы для ноутбуков", "Ноутбуки, планшеты и электронные книги>Аккумуляторы для ноутбуков"),
+                Map.entry("Зарядные устройства", "Ноутбуки, планшеты и электронные книги>Зарядные устройства"),
+                Map.entry("Чехлы для электронных книг", "Ноутбуки, планшеты и электронные книги>Чехлы для электронных книг"),
+                Map.entry("Электронные переводчики и словари", "Ноутбуки, планшеты и электронные книги>Электронные переводчики и словари")
+        ));
 
         for (String tableName : rawData.keySet()) {
-            String categoryPath = categoryMapping.getOrDefault(tableName, "Прочее>Разное");
+            String categoryPath = "Прочее>Разное"; // Категория по умолчанию
+
+            for (Map.Entry<String, String> entry : categoryMapping.entrySet()) {
+                if (tableName.contains(entry.getKey())) {
+                    categoryPath = entry.getValue();
+                    break;
+                }
+            }
+
             String[] levels = categoryPath.split(">");
             String mainCategory = levels[0];
             String subCategory = levels[1];
 
-            // Вставляем категории товаров по правильной структуре
-            categoryProducts.computeIfAbsent(mainCategory, k -> new LinkedHashMap<>())
-                            .computeIfAbsent(subCategory, k -> new LinkedHashMap<>())
-                            .computeIfAbsent(tableName, k -> new LinkedHashMap<>());
+            categoryProducts
+                    .computeIfAbsent(mainCategory, k -> new LinkedHashMap<>())
+                    .computeIfAbsent(subCategory, k -> new LinkedHashMap<>())
+                    .computeIfAbsent(tableName, k -> new LinkedHashMap<>());
         }
+
         return categoryProducts;
     }
 

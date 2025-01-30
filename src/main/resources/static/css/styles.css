@@ -19,7 +19,7 @@ a {
 /* ========== Основной контейнер ========== */
 #main-container {
     display: grid;
-    grid-template-columns: 1fr 5fr;
+    grid-template-columns: 1fr 4fr;
     gap: 20px;
     width: 95%;
     margin-top: 20px;
@@ -33,6 +33,7 @@ a {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    font-size: 14px;
 }
 #category-list li {
     padding: 5px;
@@ -40,6 +41,7 @@ a {
 }
 .category-item strong {
     padding: 5px;
+    line-height: 1.7em;
     transition: all 0.3s ease;
 }
 .category-item strong:hover {
@@ -49,6 +51,7 @@ a {
 }
 .subcategory-item span:nth-child(2) {
     padding: 5px;
+    line-height: 1.7em;
     transition: all 0.3s ease;
 }
 .subcategory-item span:nth-child(2):hover {
@@ -63,6 +66,9 @@ a {
     background-color: #000;
     color: #fff;
     cursor: pointer;
+}
+.subcategory-item ul li:first-child {
+    margin-top: 5px;
 }
 
 /* ========== Скрытие вложенных категорий и элементов ========== */
@@ -92,6 +98,7 @@ a {
     grid-column: 1;
 }
 #scrollable-table-container {
+    font-size: 16px;
     max-height: 800px;
     overflow-y: auto;
     overflow-x: hidden;
