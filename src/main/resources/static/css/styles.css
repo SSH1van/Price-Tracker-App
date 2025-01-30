@@ -110,8 +110,6 @@ th {
 }
 #apply-button {
     font-size: 16px;
-}
-#apply-button.enabled {
     cursor: pointer;
 }
 

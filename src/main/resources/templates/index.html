@@ -18,8 +18,7 @@
         <h3>Список категорий</h3>
         <ul id="category-list">
             <li th:each="category : ${data.keySet()}"
-                th:attr="data-category=${category}"
-                onclick="showTable(this)">
+                th:attr="data-category=${category}">
                 <a href="javascript:void(0);">
                     <span th:text="${category}"></span>
                 </a>
@@ -61,10 +60,10 @@
             <div id="price-diff-options">
                 <h3>Выбор режима сравнения цен:</h3>
                 <label class="radio-button">
-                    <input type="radio" name="diffOption" value="start-last" checked="checked" onchange="updateDiff()"> Первая-последняя
+                    <input type="radio" name="diffOption" value="start-last" checked="checked"> Первая-последняя
                 </label>
                 <label class="radio-button">
-                    <input type="radio" name="diffOption" value="penultimate-last" onchange="updateDiff()"> Предпоследняя-последняя
+                    <input type="radio" name="diffOption" value="penultimate-last"> Предпоследняя-последняя
                 </label>
             </div>
 
@@ -96,7 +95,7 @@
             </div>
 
             <div id="apply-container">
-                <button id="apply-button" disabled>Применить фильтры</button>
+                <button id="apply-button">Применить фильтры</button>
             </div>
 
             <!-- График изменения цен -->
