@@ -8,6 +8,9 @@ const filterInput = document.getElementById("filterInput");
 const table = document.getElementById("product-table").getElementsByTagName("tbody")[0];
 const header = document.getElementById("selected-table");
 
+/************************************************
+ *             ОТОБРАЖЕНИЕ ТАБЛИЦЫ              *
+ ************************************************/
 // Отображает таблицу товаров для выбранной категории
 function showTable(elements, categoryName) {
     if (!elements || elements.length === 0) return;
@@ -146,6 +149,9 @@ function updateSliderRange(selector, min, max) {
     }
 }
 
+/************************************************
+ *           ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ            *
+ ************************************************/
 // Применяет выбранный тип сравнения цен
 function updateDiff() {
     document.querySelector('input[name="diffOption"]:checked')?.setAttribute('checked', 'checked');
