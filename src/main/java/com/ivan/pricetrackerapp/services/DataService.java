@@ -13,7 +13,7 @@ public class DataService {
     public Map<String, Map<String, Map<String, Object>>> getStructuredCategories(Map<String, Map<String, List<Map<String, Object>>>> rawData) {
         Map<String, Map<String, Map<String, Object>>> categoryProducts = new LinkedHashMap<>();
 
-        // Карта соответствия категорий (правой части)
+        // Карта соответствия категорий
         Map<String, String> categoryMapping = new HashMap<>(Map.ofEntries(
                 // Телефоны и смарт-часы
                 Map.entry("Смартфоны", "Телефоны и смарт-часы>Смартфоны"),
@@ -80,7 +80,27 @@ public class DataService {
         } catch (Exception e) {
             System.out.println("Возникла ошибка: " + e.getMessage());
         }
+        filterData(data);
         return data;
+    }
+
+    // Фильтр, который пропускает товары показавшие снижение цены
+    private void filterData(Map<String, Map<String, List<Map<String, Object>>>> data) {
+        for (Map<String, List<Map<String, Object>>> tableData : data.values()) {
+            tableData.entrySet().removeIf(entry -> {
+                List<Map<String, Object>> prices = entry.getValue();
+                if (prices.size() < 2) return false; // Должно быть минимум 2 записи
+
+                // Отсортировать по timestamp (временная метка)
+                prices.sort(Comparator.comparing(p -> (String) p.get("timestamp")));
+
+                int firstPrice = (int) prices.getFirst().get("price");
+                int lastPrice = (int) prices.getLast().get("price");
+                int prevLastPrice = (int) prices.get(prices.size() - 2).get("price");
+
+                return (firstPrice - lastPrice) <= 0 && (prevLastPrice - lastPrice) <= 0;
+            });
+        }
     }
 
     private void extractDataFromDB(String dbPath, String timestamp, Map<String, Map<String, List<Map<String, Object>>>> data) {
