@@ -40,6 +40,7 @@ section.range-slider input[type=range]::-webkit-slider-thumb {
     /* older mobile safari and android > 2.2 */
     background-image: linear-gradient(to bottom, #dad8da 0, #413f41 100%);
     /* W3C */
+    cursor: pointer;
 }
 section.range-slider input[type=range]::-moz-range-thumb {
     pointer-events: all;
@@ -52,6 +53,7 @@ section.range-slider input[type=range]::-moz-range-thumb {
     border-radius: 14px;
     background-image: linear-gradient(to bottom, #dad8da 0, #413f41 100%);
     /* W3C */
+    cursor: pointer;
 }
 section.range-slider input[type=range]::-ms-thumb {
     pointer-events: all;
@@ -64,6 +66,7 @@ section.range-slider input[type=range]::-ms-thumb {
     border: 0;
     background-image: linear-gradient(to bottom, #dad8da 0, #413f41 100%);
     /* W3C */
+    cursor: pointer;
 }
 section.range-slider input[type=range]::-moz-range-track {
     position: relative;
@@ -118,6 +121,7 @@ section.range-slider input[type=range]::-webkit-slider-thumb {
     /* older mobile safari and android > 2.2 */
     background-image: linear-gradient(to bottom, #dad8da 0, #413f41 100%);
     /* W3C */
+    cursor: pointer;
 }
 section.range-slider input[type=range]::-moz-range-thumb {
     pointer-events: all;
@@ -130,6 +134,7 @@ section.range-slider input[type=range]::-moz-range-thumb {
     border-radius: 14px;
     background-image: linear-gradient(to bottom, #dad8da 0, #413f41 100%);
     /* W3C */
+    cursor: pointer;
 }
 section.range-slider input[type=range]::-ms-thumb {
     pointer-events: all;
@@ -141,6 +146,7 @@ section.range-slider input[type=range]::-ms-thumb {
     border-radius: 14px;
     border: 0;
     background-image: linear-gradient(to bottom, #dad8da 0, #413f41 100%);
+    cursor: pointer;
     /* W3C */
 }
 section.range-slider input[type=range]::-moz-range-track {

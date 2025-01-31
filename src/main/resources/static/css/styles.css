@@ -83,6 +83,10 @@ a {
     user-select: none;
     font-size: 14px;
     padding: 8px;
+    transition: all 0.3s ease;
+}
+.toggle-btn:hover {
+    color: #808080;
 }
 .open > .nested {
     display: block;
@@ -131,7 +135,7 @@ tr {
     transition: all 0.3s ease;
 }
 tbody tr:hover {
-    background-color: #DCDCDC;
+    background-color: #f4f4f4;
 }
 td a {
     color: #000;
