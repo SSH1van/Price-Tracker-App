@@ -2,8 +2,6 @@ let chart;
 let tempElements = null;
 let tempCategoryName = null;
 const applyButton = document.getElementById('apply-button');
-const progressBar = document.getElementById("loading-bar");
-const progressContainer = document.getElementById("progress-container");
 const filterInput = document.getElementById("filterInput");
 const table = document.getElementById("product-table").getElementsByTagName("tbody")[0];
 const header = document.getElementById("selected-table");
@@ -39,48 +37,21 @@ function showTable(elements, categoryName) {
         }
     });
 
-    setupProgressBar(allRows.length);
     processRows(allRows);
 }
 
-// Настраивает прогресс-бар
-function setupProgressBar(total) {
-    progressContainer.style.display = "flex";
-    progressBar.max = total;
-    progressBar.value = 0;
-}
 
 // Обрабатывает строки данных в батчах
 function processRows(rows) {
     let maxRows = parseInt(rowSlider.value, 10);
-    const batchSize = Math.ceil(maxRows * 0.05);
-
-    let htmlRows = "";
     let filteredRows = [];
-    let i = 0;
 
-    while (filteredRows.length < maxRows && i < rows.length) {
+    for (let i = 0; i < rows.length && filteredRows.length < maxRows; i++) {
         let rowHtml = processRow(rows[i]);
         if (rowHtml) filteredRows.push(rowHtml);
-        i++;
     }
 
-    function processBatch(startIndex) {
-        for (let i = startIndex; i < Math.min(startIndex + batchSize, filteredRows.length); i++) {
-            htmlRows += filteredRows[i];
-        }
-
-        progressBar.value = Math.min(startIndex + batchSize, filteredRows.length);
-
-        if (startIndex + batchSize < filteredRows.length) {
-            requestAnimationFrame(() => processBatch(startIndex + batchSize));
-        } else {
-            table.innerHTML = htmlRows;
-            progressContainer.style.display = "none";
-        }
-    }
-
-    processBatch(0);
+    table.innerHTML = filteredRows.join('');
 }
 
 // Обрабатывает одну строку и возвращает HTML, если она проходит фильтр
@@ -201,7 +172,6 @@ function sortTable(columnIndex) {
 
 
     // Запускаем процесс отображения уже отсортированных данных
-    setupProgressBar(allRows.length);
     processRows(allRows);
 }
 
@@ -325,77 +295,75 @@ function showChart(selectedTableId, product) {
 // Повторно загружает таблицу при нажатии на кнопку "Применить фильтры".
 applyButton.addEventListener('click', () => showTable(tempElements, tempCategoryName));
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Сортировка при клике на заголовок таблицы
-    document.querySelectorAll("#product-table thead th").forEach((header, index) => {
-        header.addEventListener("click", () => sortTable(index));
-    });
+// Сортировка при клике на заголовок таблицы
+document.querySelectorAll("#product-table thead th").forEach((header, index) => {
+    header.addEventListener("click", () => sortTable(index));
+});
 
-    // Вызов функции отрисовки графика для товара
-    document.querySelector('#product-table tbody').addEventListener('click', event => {
-        const row = event.target.closest('tr');
-        if (!row) return;
+// Вызов функции отрисовки графика для товара
+document.querySelector('#product-table tbody').addEventListener('click', event => {
+    const row = event.target.closest('tr');
+    if (!row) return;
 
-        const product = row.cells[0].textContent.trim();
-        let selectedTableId = header.textContent.trim();
-        if (!(selectedTableId in data)) {
-            let exitLoop = false;
-            for (const selectedTable in data) {
-                if (exitLoop) break;
+    const product = row.cells[0].textContent.trim();
+    let selectedTableId = header.textContent.trim();
+    if (!(selectedTableId in data)) {
+        let exitLoop = false;
+        for (const selectedTable in data) {
+            if (exitLoop) break;
 
-                for (const productUrl in data[selectedTable]) {
-                    if (productUrl === product) {
-                        selectedTableId = selectedTable;
-                        exitLoop = true;
-                        break;
-                    }
+            for (const productUrl in data[selectedTable]) {
+                if (productUrl === product) {
+                    selectedTableId = selectedTable;
+                    exitLoop = true;
+                    break;
                 }
             }
         }
+    }
 
-        if (data[selectedTableId]?.[product]) {
-            showChart(selectedTableId, product);
-        } else {
-            console.error(`Данные для продукта "${product}" не найдены`);
-        }
-    });
+    if (data[selectedTableId]?.[product]) {
+        showChart(selectedTableId, product);
+    } else {
+        console.error(`Данные для продукта "${product}" не найдены`);
+    }
+});
 
-    // Изменение режима отображения разницы цен
-    document.querySelectorAll('#price-diff-options input[name="diffOption"]').forEach(radio => {
-        radio.addEventListener('change', updateDiff);
-    });
+// Изменение режима отображения разницы цен
+document.querySelectorAll('#price-diff-options input[name="diffOption"]').forEach(radio => {
+    radio.addEventListener('change', updateDiff);
+});
 
-    // События для категорий товаров
-    document.getElementById('category-list').addEventListener('click', (event) => {
-        const toggleBtn = event.target.closest('.toggle-btn');
-        const categoryItem = event.target.closest('li');
+// События для категорий товаров
+document.getElementById('category-list').addEventListener('click', (event) => {
+    const toggleBtn = event.target.closest('.toggle-btn');
+    const categoryItem = event.target.closest('li');
 
-        if (!categoryItem) return;
+    if (!categoryItem) return;
 
-        if (toggleBtn) {
-            // Переключение раскрытия подкатегорий
-            categoryItem.classList.toggle('open');
-            toggleBtn.textContent = categoryItem.classList.contains('open') ? '▼' : '▶';
-        } else {
-            // Определяем текст категории
-            let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn)');
-            let categoryName = categoryNameElement ? categoryNameElement.textContent.trim() : "Категория";
-            tempCategoryName = categoryName;
+    if (toggleBtn) {
+        // Переключение раскрытия подкатегорий
+        categoryItem.classList.toggle('open');
+        toggleBtn.textContent = categoryItem.classList.contains('open') ? '▼' : '▶';
+    } else {
+        // Определяем текст категории
+        let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn)');
+        let categoryName = categoryNameElement ? categoryNameElement.textContent.trim() : "Категория";
+        tempCategoryName = categoryName;
 
-            // Собираем все вложенные элементы с data-category
-            const nestedItems = categoryItem.querySelectorAll('li[data-category]');
-            const selectedItems = nestedItems.length > 0 ? nestedItems : [categoryItem];
+        // Собираем все вложенные элементы с data-category
+        const nestedItems = categoryItem.querySelectorAll('li[data-category]');
+        const selectedItems = nestedItems.length > 0 ? nestedItems : [categoryItem];
 
-            // Находим min/max перед отображением
-            updateCategorySliders(selectedItems);
+        // Находим min/max перед отображением
+        updateCategorySliders(selectedItems);
 
-            // Отображаем таблицу
-            showTable(selectedItems, categoryName);
-        }
-    });
+        // Отображаем таблицу
+        showTable(selectedItems, categoryName);
+    }
+});
 
-    // Событие изменения значения слайдера количества ссылок
-    rowSlider.addEventListener("input", () => {
-        rowCountDisplay.textContent = rowSlider.value;
-    });
+// Событие изменения значения слайдера количества ссылок
+rowSlider.addEventListener("input", () => {
+    rowCountDisplay.textContent = rowSlider.value;
 });
