@@ -89,7 +89,7 @@ public class DataService {
         for (Map<String, List<Map<String, Object>>> tableData : data.values()) {
             tableData.entrySet().removeIf(entry -> {
                 List<Map<String, Object>> prices = entry.getValue();
-                if (prices.size() < 2) return false; // Должно быть минимум 2 записи
+                if (prices.size() < 2) return true; // Должно быть минимум 2 записи
 
                 // Отсортировать по timestamp (временная метка)
                 prices.sort(Comparator.comparing(p -> (String) p.get("timestamp")));
