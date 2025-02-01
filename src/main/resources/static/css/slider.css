@@ -1,7 +1,7 @@
 section.range-slider {
     position: relative;
     width: 100%;
-    height: 100px;
+    height: 80px;
     float: left;
     text-align: center;
 }
@@ -17,7 +17,7 @@ section.range-slider input[type=range] {
     -webkit-box-shadow: inset 0 1px 0 0 #cdc6c6, inset 0 -1px 0 0 #d9d4d4;
     overflow: hidden;
     left: 0;
-    top: 50px;
+    top: 30px;
     width: 100%;
     outline: none;
     height: 20px;
@@ -99,7 +99,7 @@ section.range-slider input[type=range] {
     -webkit-box-shadow: inset 0 1px 0 0 #cdc6c6, inset 0 -1px 0 0 #d9d4d4;
     overflow: hidden;
     left: 0;
-    top: 50px;
+    top: 30px;
     outline: none;
     height: 20px;
     margin: 0;

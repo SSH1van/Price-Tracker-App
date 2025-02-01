@@ -105,7 +105,7 @@ a {
 }
 #scrollable-table-container {
     font-size: 16px;
-    max-height: 800px;
+    max-height: 750px;
     overflow-y: auto;
     overflow-x: hidden;
     border: 1px solid #ccc;
@@ -129,6 +129,9 @@ th {
 }
 th:hover {
     background-color: #fff;
+}
+th:first-child:hover {
+    background-color: #f4f4f4;
 }
 tr {
     cursor: pointer;
@@ -180,6 +183,7 @@ td a:hover {
 #filterInput {
     width: 100%;
     font-size: 16px;
+    padding: 5px;
 }
 
 /* ========== Кнопка применения фильтров ========== */
@@ -193,7 +197,7 @@ td a:hover {
     font-size: 16px;
     cursor: pointer;
     border-radius: 5px;
-    padding: 10px;
+    padding: 5px 20px;
     transition: all 0.3s ease;
 }
 
