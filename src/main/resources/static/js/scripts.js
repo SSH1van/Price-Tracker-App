@@ -1,5 +1,5 @@
 let chart;
-let tempElement = null;
+let tempElements = null;
 let tempCategoryName = null;
 const applyButton = document.getElementById('apply-button');
 const progressBar = document.getElementById("loading-bar");
@@ -7,6 +7,8 @@ const progressContainer = document.getElementById("progress-container");
 const filterInput = document.getElementById("filterInput");
 const table = document.getElementById("product-table").getElementsByTagName("tbody")[0];
 const header = document.getElementById("selected-table");
+const rowSlider = document.getElementById("row-slider");
+const rowCountDisplay = document.getElementById("row-count");
 
 /************************************************
  *             ОТОБРАЖЕНИЕ ТАБЛИЦЫ              *
@@ -16,7 +18,7 @@ function showTable(elements, categoryName) {
     if (!elements || elements.length === 0) return;
 
     applyButton.disabled = false;
-    tempElement = elements;
+    tempElements = elements;
     tempCategoryName = categoryName;
 
     // Обновляем заголовок
@@ -50,31 +52,29 @@ function setupProgressBar(total) {
 
 // Обрабатывает строки данных в батчах
 function processRows(rows) {
-    const batchSize = Math.ceil(rows.length * 0.05); // 5% за раз
-    let htmlRows = "";
+    let maxRows = parseInt(rowSlider.value, 10);
+    const batchSize = Math.ceil(maxRows * 0.05);
 
-    const filters = getFilters();
-    let minPrice = Infinity, maxPrice = -Infinity;
-    let minDiff = Infinity, maxDiff = -Infinity;
+    let htmlRows = "";
+    let filteredRows = [];
+    let i = 0;
+
+    while (filteredRows.length < maxRows && i < rows.length) {
+        let rowHtml = processRow(rows[i]);
+        if (rowHtml) filteredRows.push(rowHtml);
+        i++;
+    }
 
     function processBatch(startIndex) {
-        for (let i = startIndex; i < Math.min(startIndex + batchSize, rows.length); i++) {
-            const rowHtml = processRow(rows[i], filters, (price, diff) => {
-                minPrice = Math.min(minPrice, price);
-                maxPrice = Math.max(maxPrice, price);
-                minDiff = Math.min(minDiff, diff);
-                maxDiff = Math.max(maxDiff, diff);
-            });
-
-            if (rowHtml) htmlRows += rowHtml;
+        for (let i = startIndex; i < Math.min(startIndex + batchSize, filteredRows.length); i++) {
+            htmlRows += filteredRows[i];
         }
 
-        progressBar.value = Math.min(startIndex + batchSize, rows.length);
+        progressBar.value = Math.min(startIndex + batchSize, filteredRows.length);
 
-        if (startIndex + batchSize < rows.length) {
+        if (startIndex + batchSize < filteredRows.length) {
             requestAnimationFrame(() => processBatch(startIndex + batchSize));
         } else {
-            updateSliders(minPrice, maxPrice, minDiff, maxDiff);
             table.innerHTML = htmlRows;
             progressContainer.style.display = "none";
         }
@@ -84,21 +84,14 @@ function processRows(rows) {
 }
 
 // Обрабатывает одну строку и возвращает HTML, если она проходит фильтр
-function processRow([link, valueList], filters, updateMinMax) {
+function processRow([link, valueList]) {
     if (!valueList.length) return "";
 
-    const { minCurrentPrice, maxCurrentPrice, minPriceDiff, maxPriceDiff, diffType, filterText } = filters;
-    const latestPrice = valueList.at(-1).price;
-    const initialPrice = valueList[0].price;
-    const penultimatePrice = valueList.length > 1 ? valueList.at(-2).price : latestPrice;
-
-    let diffText = diffType === "start-last" ? initialPrice - latestPrice : penultimatePrice - latestPrice;
-    let percentText = ((diffText * 100) / (diffType === "start-last" ? initialPrice : penultimatePrice)).toFixed(1);
-
-    updateMinMax(latestPrice, diffText);
+    const { minCurrentPrice, maxCurrentPrice, minPriceDiff, maxPriceDiff, diffType, filterText } = getFilters();
+    const { latestPrice, diffPrice, percentText } = getPricePercent(valueList, diffType);
 
     if (latestPrice < minCurrentPrice || latestPrice > maxCurrentPrice ||
-        diffText < minPriceDiff || diffText > maxPriceDiff ||
+        diffPrice < minPriceDiff || diffPrice > maxPriceDiff ||
         (filterText && !link.toLowerCase().includes(filterText))) {
         return "";
     }
@@ -106,21 +99,37 @@ function processRow([link, valueList], filters, updateMinMax) {
     return `<tr>
                 <td><a href="${link}" target="_blank">${link}</a></td>
                 <td>${latestPrice}</td>
-                <td>${diffText}</td>
+                <td>${diffPrice}</td>
                 <td>${percentText}</td>
             </tr>`;
 }
 
+// Получает последнюю цену, разницу и процент разницы
+function getPricePercent(valueList, diffType) {
+    const latestPrice = valueList.at(-1).price;
+    const initialPrice = valueList[0].price;
+    const penultimatePrice = valueList.length > 1 ? valueList.at(-2).price : latestPrice;
+
+    let diffPrice = diffType === "start-last" ? initialPrice - latestPrice : penultimatePrice - latestPrice;
+    let percentText = ((diffPrice * 100) / (diffType === "start-last" ? initialPrice : penultimatePrice)).toFixed(1);
+
+    return { latestPrice, diffPrice, percentText };
+}
+
 // Получает текущие значения фильтров
 function getFilters() {
-    const selectedOption = document.querySelector('input[name="diffOption"]:checked');
-    const diffType = selectedOption?.value.includes("start-last") ? "start-last" : "prev-last";
-
+    const diffType = getDiffType();
     const [minCurrentPrice, maxCurrentPrice] = getSliderRange("#sliders div:nth-child(1) input[type='range']");
     const [minPriceDiff, maxPriceDiff] = getSliderRange("#sliders div:nth-child(2) input[type='range']");
     const filterText = filterInput.value.toLowerCase();
 
     return { minCurrentPrice, maxCurrentPrice, minPriceDiff, maxPriceDiff, diffType, filterText };
+}
+
+// Получает тип разницы цен
+function getDiffType() {
+    const selectedOption = document.querySelector('input[name="diffOption"]:checked');
+    return selectedOption?.value.includes("start-last") ? "start-last" : "prev-last";
 }
 
 // Возвращает минимальное и максимальное значение ползунков
@@ -141,11 +150,14 @@ function updateSliders(minPrice, maxPrice, minDiff, maxDiff) {
 function updateSliderRange(selector, min, max) {
     const sliders = document.querySelectorAll(selector);
     if (sliders.length === 2) {
-        sliders.forEach(slider => {
-            slider.min = min;
-            slider.max = max;
-        });
-        sliders[0].oninput();
+        sliders[0].min = sliders[1].min = min;
+        sliders[0].max = sliders[1].max = max;
+
+        sliders[0].value = min;
+        sliders[1].value = max;
+
+        sliders[0].dispatchEvent(new Event("input"));
+        sliders[1].dispatchEvent(new Event("input"));
     }
 }
 
@@ -155,26 +167,97 @@ function updateSliderRange(selector, min, max) {
 // Применяет выбранный тип сравнения цен
 function updateDiff() {
     document.querySelector('input[name="diffOption"]:checked')?.setAttribute('checked', 'checked');
-    showTable(tempElement, tempCategoryName);
+    updateCategorySliders(tempElements);
+    showTable(tempElements, tempCategoryName)
 }
 
 // Сортирует таблицу по указанному столбцу
 function sortTable(columnIndex) {
-    const table = document.getElementById("product-table");
-    const tbody = table.querySelector("tbody");
-    const rows = Array.from(tbody.rows);
-
     // Определяем порядок сортировки. Для последней цены от меньшего к большему, для остальных наоборот
-    let isAscending = columnIndex === 1;
+    const currentSortOrder = columnIndex === 1;
 
-    rows.sort((rowA, rowB) => {
-        const valueA = parseFloat(rowA.cells[columnIndex].textContent) || rowA.cells[columnIndex].textContent.trim();
-        const valueB = parseFloat(rowB.cells[columnIndex].textContent) || rowB.cells[columnIndex].textContent.trim();
-        return isAscending ? (valueA > valueB ? 1 : -1) : (valueA < valueB ? 1 : -1);
+    if (!tempElements || tempElements.length === 0 || columnIndex === 0) return;
+    const diffType = getDiffType();
+
+    let allRows = [];
+
+    // Собираем все данные из tempElement
+    tempElements.forEach(element => {
+        const category = element.getAttribute("data-category");
+        const categoryData = data[category];
+
+        if (categoryData) {
+            allRows = allRows.concat(Object.entries(categoryData));
+        }
     });
 
-    tbody.innerHTML = "";
-    rows.forEach(row => tbody.appendChild(row));
+    // Сортируем все строки по нужному столбцу
+    allRows.sort((a, b) => {
+        const rowA = extractSortValue(a, columnIndex, diffType);
+        const rowB = extractSortValue(b, columnIndex, diffType);
+
+        return currentSortOrder ? (rowA > rowB ? 1 : -1) : (rowA < rowB ? 1 : -1);
+    });
+
+
+    // Запускаем процесс отображения уже отсортированных данных
+    setupProgressBar(allRows.length);
+    processRows(allRows);
+}
+
+// Функция извлечения значения для сортировки
+function extractSortValue(row, columnIndex, diffType) {
+    const valueList = row[1];
+    if (!valueList.length) return 0;
+
+    const latestPrice = valueList.at(-1).price;
+    const initialPrice = valueList[0].price;
+    const penultimatePrice = valueList.length > 1 ? valueList.at(-2).price : latestPrice;
+
+    switch (columnIndex) {
+        case 1:
+            return latestPrice; // Последняя цена
+        case 2: {
+            // Разница (исходя из diffType)
+            return diffType === "start-last"
+                ? initialPrice - latestPrice
+                : penultimatePrice - latestPrice;
+        }
+        case 3: {
+            // Процент изменения (исходя из diffType)
+            const basePrice = diffType === "start-last" ? initialPrice : penultimatePrice;
+            return basePrice ? ((basePrice - latestPrice) * 100) / basePrice : 0;
+        }
+        default:
+            return 0;
+    }
+}
+
+// Функция обновления границ слайдеров на основе данных категории
+function updateCategorySliders(elements) {
+    let minPrice = Infinity, maxPrice = -Infinity;
+    let minDiff = Infinity, maxDiff = -Infinity;
+
+    elements.forEach(element => {
+        const category = element.getAttribute("data-category");
+        const categoryData = data[category];
+
+        if (categoryData) {
+            Object.values(categoryData).forEach(valueList => {
+                if (!valueList.length) return;
+
+                const diffType = getDiffType();
+                const { latestPrice, diffPrice, percentText: _  } = getPricePercent(valueList, diffType);
+
+                minPrice = Math.min(minPrice, latestPrice);
+                maxPrice = Math.max(maxPrice, latestPrice);
+                minDiff = Math.min(minDiff, diffPrice);
+                maxDiff = Math.max(maxDiff, diffPrice);
+            });
+        }
+    });
+
+    updateSliders(minPrice, maxPrice, minDiff, maxDiff);
 }
 
 /************************************************
@@ -240,7 +323,7 @@ function showChart(selectedTableId, product) {
  *            СОБЫТИЯ ДЛЯ ЭЛЕМЕНТОВ             *
  ************************************************/
 // Повторно загружает таблицу при нажатии на кнопку "Применить фильтры".
-applyButton.addEventListener('click', () => showTable(tempElement, tempCategoryName));
+applyButton.addEventListener('click', () => showTable(tempElements, tempCategoryName));
 
 document.addEventListener('DOMContentLoaded', () => {
     // Сортировка при клике на заголовок таблицы
@@ -301,14 +384,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Собираем все вложенные элементы с data-category
             const nestedItems = categoryItem.querySelectorAll('li[data-category]');
+            const selectedItems = nestedItems.length > 0 ? nestedItems : [categoryItem];
 
-            if (nestedItems.length > 0) {
-                // Если кликнули на большую категорию, показываем все вложенные
-                showTable(nestedItems, categoryName);
-            } else if (categoryItem.hasAttribute('data-category')) {
-                // Если это самая глубокая категория, показываем только её
-                showTable([categoryItem], categoryName);
-            }
+            // Находим min/max перед отображением
+            updateCategorySliders(selectedItems);
+
+            // Отображаем таблицу
+            showTable(selectedItems, categoryName);
         }
+    });
+
+    // Событие изменения значения слайдера количества ссылок
+    rowSlider.addEventListener("input", () => {
+        rowCountDisplay.textContent = rowSlider.value;
     });
 });

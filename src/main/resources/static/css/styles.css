@@ -130,11 +130,13 @@ th {
 th:hover {
     background-color: #fff;
 }
+th:first-child {
+    cursor: default;
+}
 th:first-child:hover {
     background-color: #f4f4f4;
 }
 tr {
-    cursor: pointer;
     transition: all 0.3s ease;
 }
 tbody tr:hover {
@@ -177,6 +179,51 @@ td a:hover {
 .radio-button {
     cursor: pointer;
     margin-top: 10px;
+}
+
+#row-container {
+    display: flex;
+    margin: 20px 0;
+}
+#row-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 20px;
+    background: #f1efef;
+    border-radius: 10px;
+    outline: none;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+
+    box-shadow: inset 0 1px 0 0 #cdc6c6, inset 0 -1px 0 0 #d9d4d4;
+    -webkit-box-shadow: inset 0 1px 0 0 #cdc6c6, inset 0 -1px 0 0 #d9d4d4;
+}
+
+#row-slider:hover {
+    opacity: 1;
+}
+
+#row-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-image: linear-gradient(to bottom, #dad8da 0, #413f41 100%);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#row-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-image: linear-gradient(to bottom, #dad8da 0, #413f41 100%);
+    border-radius: 50%;
+    cursor: pointer;
+}
+#row-count {
+    width: 10%;
+    text-align: center;
+    align-content: center;
 }
 
 /* ========== Поле ввода для фильтрации ссылок ========== */
