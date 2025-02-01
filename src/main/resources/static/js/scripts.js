@@ -186,15 +186,13 @@ function extractSortValue(row, columnIndex, diffType) {
 
     switch (columnIndex) {
         case 1:
-            return latestPrice; // Последняя цена
+            return latestPrice;
         case 2: {
-            // Разница (исходя из diffType)
             return diffType === "start-last"
                 ? initialPrice - latestPrice
                 : penultimatePrice - latestPrice;
         }
         case 3: {
-            // Процент изменения (исходя из diffType)
             const basePrice = diffType === "start-last" ? initialPrice : penultimatePrice;
             return basePrice ? ((basePrice - latestPrice) * 100) / basePrice : 0;
         }
