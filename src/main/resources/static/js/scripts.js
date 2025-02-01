@@ -224,7 +224,7 @@ function updateCategorySliders(elements) {
                 if (!valueList.length) return;
 
                 const diffType = getDiffType();
-                const { latestPrice, diffPrice, percentText: _  } = getPricePercent(valueList, diffType);
+                const { latestPrice, diffPrice} = getPricePercent(valueList, diffType);
 
                 minPrice = Math.min(minPrice, latestPrice);
                 maxPrice = Math.max(maxPrice, latestPrice);
