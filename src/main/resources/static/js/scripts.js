@@ -109,24 +109,34 @@ function getSliderRange(selector) {
     return min > max ? [max, min] : [min, max];
 }
 
-// Обновляет значения ползунков на основе минимальных и максимальных значений цен и разницы цен
+// Обновляет значения ползунков и полей ввода на основе минимальных и максимальных значений
 function updateSliders(minPrice, maxPrice, minDiff, maxDiff) {
-    updateSliderRange("#sliders > div:nth-child(1) input[type='range']", minPrice, maxPrice);
-    updateSliderRange("#sliders > div:nth-child(2) input[type='range']", minDiff, maxDiff);
+    updateSliderRange("#sliders > div:nth-child(1)", minPrice, maxPrice);
+    updateSliderRange("#sliders > div:nth-child(2)", minDiff, maxDiff);
 }
 
-// Устанавливает минимальные и максимальные значения для ползунков и обновляет их визуальное состояние
-function updateSliderRange(selector, min, max) {
-    const sliders = document.querySelectorAll(selector);
-    if (sliders.length === 2) {
-        sliders[0].min = sliders[1].min = min;
-        sliders[0].max = sliders[1].max = max;
+// Устанавливает минимальные и максимальные значения для ползунков и полей ввода
+function updateSliderRange(parentSelector, min, max) {
+    const parent = document.querySelector(parentSelector);
+    if (!parent) return;
 
-        sliders[0].value = min;
-        sliders[1].value = max;
+    const sliders = parent.querySelectorAll("input[type='range']");
+    const inputs = parent.querySelectorAll("input[type='number']");
 
+    if (sliders.length === 2 && inputs.length === 2) {
+        // Обновляем минимальные и максимальные значения
+        sliders[0].min = sliders[1].min = inputs[0].min = inputs[1].min = min;
+        sliders[0].max = sliders[1].max = inputs[0].max = inputs[1].max = max;
+
+        // Устанавливаем значения ползунков
+        sliders[0].value = inputs[0].value = min;
+        sliders[1].value = inputs[1].value = max;
+
+        // Принудительно вызываем события обновления
         sliders[0].dispatchEvent(new Event("input"));
         sliders[1].dispatchEvent(new Event("input"));
+        inputs[0].dispatchEvent(new Event("input"));
+        inputs[1].dispatchEvent(new Event("input"));
     }
 }
 
