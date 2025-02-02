@@ -133,15 +133,11 @@ function updateSliderRange(selector, min, max) {
 // Применяет выбранный тип сравнения цен
 function updateDiff() {
     if (!tempElements) return;
-    overlay.classList.add('active');
 
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            document.querySelector('input[name="diffOption"]:checked')?.setAttribute('checked', 'checked');
-            updateCategorySliders(tempElements);
-            showTable(tempElements, tempCategoryName);
-            overlay.classList.remove('active');
-        });
+    runWithLoading(() => {
+        document.querySelector('input[name="diffOption"]:checked')?.setAttribute('checked', 'checked');
+        updateCategorySliders(tempElements);
+        showTable(tempElements, tempCategoryName);
     });
 }
 
@@ -229,6 +225,18 @@ function updateCategorySliders(elements) {
     updateSliders(minPrice, maxPrice, minDiff, maxDiff);
 }
 
+// Отображение экрана загрузки
+function runWithLoading(action) {
+    overlay.classList.add('active');
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            action();
+            overlay.classList.remove('active');
+        });
+    });
+}
+
 /************************************************
  *              ФУНКЦИОНАЛ ГРАФИКА              *
  ************************************************/
@@ -293,12 +301,8 @@ function formatDate(input) {
  ************************************************/
 // События для категорий товаров
 document.getElementById('category-list').addEventListener('click', (event) => {
-    overlay.classList.add('active');
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            processCategoryClick(event);
-        });
+    runWithLoading(() => {
+        processCategoryClick(event);
     });
 });
 
@@ -367,25 +371,16 @@ document.querySelector('#product-table tbody').addEventListener('click', event =
 
 // Повторно загружает таблицу при нажатии на кнопку "Применить фильтры".
 applyButton.addEventListener('click', () => {
-    overlay.classList.add('active');
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            showTable(tempElements, tempCategoryName);
-            overlay.classList.remove('active');
-        });
+    runWithLoading(() => {
+        showTable(tempElements, tempCategoryName);
     });
 });
 
 // Сортировка при клике на заголовок таблицы
 document.querySelectorAll("#product-table thead th").forEach((header, index) => {
     header.addEventListener("click", () => {
-        overlay.classList.add('active');
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                sortTable(index);
-                overlay.classList.remove('active');
-            });
+        runWithLoading(() => {
+            sortTable(index);
         });
     });
 });
