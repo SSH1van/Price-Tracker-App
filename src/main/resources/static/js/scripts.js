@@ -16,19 +16,13 @@ const overlay = document.getElementById('loadingOverlay');
 function showTable(elements, categoryName) {
     if (!elements || elements.length === 0) return;
 
-    applyButton.disabled = false;
     tempElements = elements;
     tempCategoryName = categoryName;
-
-    // Обновляем заголовок
     header.textContent = categoryName;
-
-    // Очистка таблицы
     table.innerHTML = "";
 
     // Объединяем данные всех переданных категорий
     let allRows = [];
-
     elements.forEach(element => {
         const category = element.getAttribute("data-category");
         const categoryData = data[category];
@@ -76,6 +70,9 @@ function processRow([link, valueList]) {
             </tr>`;
 }
 
+/************************************************
+ *           ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ            *
+ ************************************************/
 // Получает последнюю цену, разницу и процент разницы
 function getPricePercent(valueList, diffType) {
     const latestPrice = valueList.at(-1).price;
@@ -133,9 +130,6 @@ function updateSliderRange(selector, min, max) {
     }
 }
 
-/************************************************
- *           ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ            *
- ************************************************/
 // Применяет выбранный тип сравнения цен
 function updateDiff() {
     if (!tempElements) return;
@@ -158,7 +152,6 @@ function sortTable(columnIndex) {
 
     if (!tempElements || tempElements.length === 0 || columnIndex === 0) return;
     const diffType = getDiffType();
-
     let allRows = [];
 
     // Собираем все данные из tempElement
@@ -178,7 +171,6 @@ function sortTable(columnIndex) {
 
         return currentSortOrder ? (rowA > rowB ? 1 : -1) : (rowA < rowB ? 1 : -1);
     });
-
 
     // Запускаем процесс отображения уже отсортированных данных
     processRows(allRows);
@@ -240,17 +232,6 @@ function updateCategorySliders(elements) {
 /************************************************
  *              ФУНКЦИОНАЛ ГРАФИКА              *
  ************************************************/
-// Преобразует строку даты
-function formatDate(input) {
-    const [datePart, timePart] = input.split('_');
-    const [day, month, year] = datePart.split('-');
-    const [hour, minute, second] = timePart.split('-');
-
-    const date = new Date(year, month - 1, day, hour, minute, second);
-
-    return date.toISOString().slice(0, 19);
-}
-
 // Отображает график изменения цены для выбранного товара
 function showChart(selectedTableId, product) {
     const productData = data[selectedTableId][product] || [];
@@ -296,68 +277,20 @@ function showChart(selectedTableId, product) {
     }
 }
 
+// Преобразует строку даты
+function formatDate(input) {
+    const [datePart, timePart] = input.split('_');
+    const [day, month, year] = datePart.split('-');
+    const [hour, minute, second] = timePart.split('-');
+
+    const date = new Date(year, month - 1, day, hour, minute, second);
+
+    return date.toISOString().slice(0, 19);
+}
+
 /************************************************
  *            СОБЫТИЯ ДЛЯ ЭЛЕМЕНТОВ             *
  ************************************************/
-// Повторно загружает таблицу при нажатии на кнопку "Применить фильтры".
-applyButton.addEventListener('click', () => {
-    overlay.classList.add('active');
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            showTable(tempElements, tempCategoryName);
-            overlay.classList.remove('active');
-        });
-    });
-});
-
-// Сортировка при клике на заголовок таблицы
-document.querySelectorAll("#product-table thead th").forEach((header, index) => {
-    header.addEventListener("click", () => {
-        overlay.classList.add('active');
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                sortTable(index);
-                overlay.classList.remove('active');
-            });
-        });
-    });
-});
-
-// Вызов функции отрисовки графика для товара
-document.querySelector('#product-table tbody').addEventListener('click', event => {
-    const row = event.target.closest('tr');
-    if (!row) return;
-
-    const product = row.cells[0].textContent.trim();
-    let selectedTableId = header.textContent.trim();
-    if (!(selectedTableId in data)) {
-        let exitLoop = false;
-        for (const selectedTable in data) {
-            if (exitLoop) break;
-
-            for (const productUrl in data[selectedTable]) {
-                if (productUrl === product) {
-                    selectedTableId = selectedTable;
-                    exitLoop = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    if (data[selectedTableId]?.[product]) {
-        showChart(selectedTableId, product);
-    } else {
-        console.error(`Данные для продукта "${product}" не найдены`);
-    }
-});
-
-// Изменение режима отображения разницы цен
-document.querySelectorAll('#price-diff-options input[name="diffOption"]').forEach(radio => {
-    radio.addEventListener('change', updateDiff);
-});
-
 // События для категорий товаров
 document.getElementById('category-list').addEventListener('click', (event) => {
     overlay.classList.add('active');
@@ -401,6 +334,66 @@ function processCategoryClick(event) {
         overlay.classList.remove('active');
     }
 }
+
+// Вызов функции отрисовки графика для товара
+document.querySelector('#product-table tbody').addEventListener('click', event => {
+    const row = event.target.closest('tr');
+    if (!row) return;
+
+    const product = row.cells[0].textContent.trim();
+    let selectedTableId = header.textContent.trim();
+    if (!(selectedTableId in data)) {
+        let exitLoop = false;
+        for (const selectedTable in data) {
+            if (exitLoop) break;
+
+            for (const productUrl in data[selectedTable]) {
+                if (productUrl === product) {
+                    selectedTableId = selectedTable;
+                    exitLoop = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (data[selectedTableId]?.[product]) {
+        showChart(selectedTableId, product);
+    } else {
+        console.error(`Данные для продукта "${product}" не найдены`);
+    }
+});
+
+
+// Повторно загружает таблицу при нажатии на кнопку "Применить фильтры".
+applyButton.addEventListener('click', () => {
+    overlay.classList.add('active');
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            showTable(tempElements, tempCategoryName);
+            overlay.classList.remove('active');
+        });
+    });
+});
+
+// Сортировка при клике на заголовок таблицы
+document.querySelectorAll("#product-table thead th").forEach((header, index) => {
+    header.addEventListener("click", () => {
+        overlay.classList.add('active');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                sortTable(index);
+                overlay.classList.remove('active');
+            });
+        });
+    });
+});
+
+// Изменение режима отображения разницы цен
+document.querySelectorAll('#price-diff-options input[name="diffOption"]').forEach(radio => {
+    radio.addEventListener('change', updateDiff);
+});
 
 // Событие изменения значения слайдера количества ссылок
 rowSlider.addEventListener("input", () => {
