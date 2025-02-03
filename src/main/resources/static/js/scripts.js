@@ -111,6 +111,7 @@ function getSliderRange(selector) {
 
 // Обновляет значения ползунков и полей ввода на основе минимальных и максимальных значений
 function updateSliders(minPrice, maxPrice, minDiff, maxDiff) {
+    if (minPrice > 0) minPrice = 0;
     updateSliderRange("#sliders > div:nth-child(1)", minPrice, maxPrice);
     updateSliderRange("#sliders > div:nth-child(2)", minDiff, maxDiff);
 }
