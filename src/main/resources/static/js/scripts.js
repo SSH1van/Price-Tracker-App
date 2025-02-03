@@ -298,7 +298,7 @@ function showChart(selectedTableId, product) {
 // Преобразует строку даты
 function formatDate(input) {
     const [datePart, timePart] = input.split('_');
-    const [day, month, year] = datePart.split('-');
+    const [year, month, day] = datePart.split('-');
     const [hour, minute, second] = timePart.split('-');
 
     const date = new Date(year, month - 1, day, hour, minute, second);
