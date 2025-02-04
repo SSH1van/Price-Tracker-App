@@ -86,7 +86,13 @@ public class DataService {
 
     // Фильтр, который пропускает товары показавшие снижение цены
     private void filterData(Map<String, Map<String, List<Map<String, Object>>>> data) {
-        for (Map<String, List<Map<String, Object>>> tableData : data.values()) {
+        Iterator<Map.Entry<String, Map<String, List<Map<String, Object>>>>> dataIterator = data.entrySet().iterator();
+
+        while (dataIterator.hasNext()) {
+            Map.Entry<String, Map<String, List<Map<String, Object>>>> tableEntry = dataIterator.next();
+            Map<String, List<Map<String, Object>>> tableData = tableEntry.getValue();
+
+            // Удаляем элементы внутри tableData, если они не проходят фильтрацию
             tableData.entrySet().removeIf(entry -> {
                 List<Map<String, Object>> prices = entry.getValue();
                 if (prices.size() < 2) return true; // Должно быть минимум 2 записи
@@ -100,6 +106,11 @@ public class DataService {
 
                 return (firstPrice - lastPrice) <= 0 && (prevLastPrice - lastPrice) <= 0;
             });
+
+            // Если после удаления tableData пустой, удалить его из data
+            if (tableData.isEmpty()) {
+                dataIterator.remove();
+            }
         }
     }
 
