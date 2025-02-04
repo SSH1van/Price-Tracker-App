@@ -333,7 +333,7 @@ function processCategoryClick(event) {
         overlay.classList.remove('active');
     } else {
         // Определяем текст категории
-        let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn)');
+        let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn), a');
         let categoryName = categoryNameElement ? categoryNameElement.textContent.trim() : "Категория";
         tempCategoryName = categoryName;
 
