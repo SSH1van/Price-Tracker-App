@@ -1,85 +1,52 @@
 package com.ivan.pricetrackerapp.services;
 
-import org.springframework.stereotype.Service;
-
 import java.sql.*;
-import java.nio.file.*;
 import java.util.*;
+import java.nio.file.*;
+
+import java.io.File;
+import java.time.LocalDate;
 import java.util.stream.Stream;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DataService {
 
-    public Map<String, Map<String, Map<String, Object>>> getStructuredCategories(Map<String, Map<String, List<Map<String, Object>>>> rawData) {
-        Map<String, Map<String, Map<String, Object>>> categoryProducts = new LinkedHashMap<>();
+    // Получение диапазона доступных дат
+    public List<String> getAvailableDates(String directoryPath) {
+        File dir = new File(directoryPath);
+        if (!dir.exists() || !dir.isDirectory()) return Collections.emptyList();
 
-        // Карта соответствия категорий
-        Map<String, String> categoryMapping = new HashMap<>(Map.ofEntries(
-                // Телефоны и смарт-часы
-                Map.entry("Смартфоны", "Телефоны и смарт-часы>Смартфоны"),
-                Map.entry("Аксессуары для смартфонов и телефонов", "Телефоны и смарт-часы>Аксессуары для смартфонов и телефонов"),
-                Map.entry("Смарт-часы", "Телефоны и смарт-часы>Смарт-часы"),
-                Map.entry("Фитнес-браслеты", "Телефоны и смарт-часы>Фитнес-браслеты"),
-                Map.entry("Ремешки для смарт-часов и фитнес-браслетов", "Телефоны и смарт-часы>Ремешки для смарт-часов и фитнес-браслетов"),
-                Map.entry("Аксессуары для смарт-часов и фитнес-браслетов", "Телефоны и смарт-часы>Аксессуары для смарт-часов и фитнес-браслетов"),
-                Map.entry("Мобильные телефоны", "Телефоны и смарт-часы>Мобильные телефоны"),
-                Map.entry("Sim-карты", "Телефоны и смарт-часы>Sim-карты"),
-                Map.entry("Запчасти для смартфонов", "Телефоны и смарт-часы>Запчасти для смартфонов"),
-                Map.entry("Проводные и радиотелефоны", "Телефоны и смарт-часы>Проводные и радиотелефоны"),
-
-                // Ноутбуки, планшеты и электронные книги
-                Map.entry("Ноутбуки", "Ноутбуки, планшеты и электронные книги>Ноутбуки"),
-                Map.entry("Игровые ноутбуки", "Ноутбуки, планшеты и электронные книги>Игровые ноутбуки"),
-                Map.entry("Планшеты", "Ноутбуки, планшеты и электронные книги>Планшеты"),
-                Map.entry("Электронные книги", "Ноутбуки, планшеты и электронные книги>Электронные книги"),
-                Map.entry("Графические планшеты", "Ноутбуки, планшеты и электронные книги>Графические планшеты"),
-                Map.entry("Чехлы и подставки для планшетов", "Ноутбуки, планшеты и электронные книги>Чехлы и подставки для планшетов"),
-                Map.entry("Стилусы", "Ноутбуки, планшеты и электронные книги>Стилусы"),
-                Map.entry("Аксессуары для ноутбуков", "Ноутбуки, планшеты и электронные книги>Аксессуары для ноутбуков"),
-                Map.entry("Запчасти для ноутбуков и планшетов", "Ноутбуки, планшеты и электронные книги>Запчасти для ноутбуков и планшетов"),
-                Map.entry("Аккумуляторы для ноутбуков", "Ноутбуки, планшеты и электронные книги>Аккумуляторы для ноутбуков"),
-                Map.entry("Зарядные устройства", "Ноутбуки, планшеты и электронные книги>Зарядные устройства"),
-                Map.entry("Чехлы для электронных книг", "Ноутбуки, планшеты и электронные книги>Чехлы для электронных книг"),
-                Map.entry("Электронные переводчики и словари", "Ноутбуки, планшеты и электронные книги>Электронные переводчики и словари")
-        ));
-
-        for (String tableName : rawData.keySet()) {
-            String categoryPath = "Прочее>Разное"; // Категория по умолчанию
-
-            for (Map.Entry<String, String> entry : categoryMapping.entrySet()) {
-                if (tableName.contains(entry.getKey())) {
-                    categoryPath = entry.getValue();
-                    break;
-                }
-            }
-
-            String[] levels = categoryPath.split(">");
-            String mainCategory = levels[0];
-            String subCategory = levels[1];
-
-            categoryProducts
-                    .computeIfAbsent(mainCategory, k -> new LinkedHashMap<>())
-                    .computeIfAbsent(subCategory, k -> new LinkedHashMap<>())
-                    .computeIfAbsent(tableName, k -> new LinkedHashMap<>());
-        }
-
-        return categoryProducts;
+        return Arrays.stream(Objects.requireNonNull(dir.list()))
+                .map(name -> name.split("_")[0])
+                .distinct()
+                .sorted()
+                .toList();
     }
 
-    public Map<String, Map<String, List<Map<String, Object>>>> loadData(String resultsDir) {
+    // Загрузить данные в указанном диапазоне дат
+    public Map<String, Map<String, List<Map<String, Object>>>> loadDataInRange(String resultsDir, LocalDate start, LocalDate end) {
         Map<String, Map<String, List<Map<String, Object>>>> data = new HashMap<>();
+
         try (Stream<Path> folders = Files.list(Paths.get(resultsDir))) {
             folders.filter(Files::isDirectory)
                     .forEach(folder -> {
-                        String timestamp = folder.getFileName().toString();
-                        Path dbPath = folder.resolve("products.db");
-                        if (Files.exists(dbPath)) {
-                            extractDataFromDB(dbPath.toString(), timestamp, data);
-                        }
+                        String folderName = folder.getFileName().toString();
+                        try {
+                            String datePart = folderName.split("_")[0]; // Берем только дату из названия
+                            LocalDate folderDate = LocalDate.parse(datePart);
+                            if (!folderDate.isBefore(start) && !folderDate.isAfter(end)) {
+                                Path dbPath = folder.resolve("products.db");
+                                if (Files.exists(dbPath)) {
+                                    extractDataFromDB(dbPath.toString(), folderName, data);
+                                }
+                            }
+                        } catch (Exception ignored) {}
                     });
         } catch (Exception e) {
-            System.out.println("Возникла ошибка: " + e.getMessage());
+            System.out.println("Ошибка загрузки данных: " + e.getMessage());
         }
+
         filterData(data);
         return data;
     }
@@ -155,5 +122,61 @@ public class DataService {
         } catch (SQLException e) {
             System.out.println("Возникла ошибка при обработке таблицы " + tableName + ": " + e.getMessage());
         }
+    }
+
+    // Карта соответствия категорий
+    public Map<String, Map<String, Map<String, Object>>> getStructuredCategories(Map<String, Map<String, List<Map<String, Object>>>> rawData) {
+        Map<String, Map<String, Map<String, Object>>> categoryProducts = new LinkedHashMap<>();
+
+        Map<String, String> categoryMapping = new HashMap<>(Map.ofEntries(
+                // Телефоны и смарт-часы
+                Map.entry("Смартфоны", "Телефоны и смарт-часы>Смартфоны"),
+                Map.entry("Аксессуары для смартфонов и телефонов", "Телефоны и смарт-часы>Аксессуары для смартфонов и телефонов"),
+                Map.entry("Смарт-часы", "Телефоны и смарт-часы>Смарт-часы"),
+                Map.entry("Фитнес-браслеты", "Телефоны и смарт-часы>Фитнес-браслеты"),
+                Map.entry("Ремешки для смарт-часов и фитнес-браслетов", "Телефоны и смарт-часы>Ремешки для смарт-часов и фитнес-браслетов"),
+                Map.entry("Аксессуары для смарт-часов и фитнес-браслетов", "Телефоны и смарт-часы>Аксессуары для смарт-часов и фитнес-браслетов"),
+                Map.entry("Мобильные телефоны", "Телефоны и смарт-часы>Мобильные телефоны"),
+                Map.entry("Sim-карты", "Телефоны и смарт-часы>Sim-карты"),
+                Map.entry("Запчасти для смартфонов", "Телефоны и смарт-часы>Запчасти для смартфонов"),
+                Map.entry("Проводные и радиотелефоны", "Телефоны и смарт-часы>Проводные и радиотелефоны"),
+
+                // Ноутбуки, планшеты и электронные книги
+                Map.entry("Ноутбуки", "Ноутбуки, планшеты и электронные книги>Ноутбуки"),
+                Map.entry("Игровые ноутбуки", "Ноутбуки, планшеты и электронные книги>Игровые ноутбуки"),
+                Map.entry("Планшеты", "Ноутбуки, планшеты и электронные книги>Планшеты"),
+                Map.entry("Электронные книги", "Ноутбуки, планшеты и электронные книги>Электронные книги"),
+                Map.entry("Графические планшеты", "Ноутбуки, планшеты и электронные книги>Графические планшеты"),
+                Map.entry("Чехлы и подставки для планшетов", "Ноутбуки, планшеты и электронные книги>Чехлы и подставки для планшетов"),
+                Map.entry("Стилусы", "Ноутбуки, планшеты и электронные книги>Стилусы"),
+                Map.entry("Аксессуары для ноутбуков", "Ноутбуки, планшеты и электронные книги>Аксессуары для ноутбуков"),
+                Map.entry("Запчасти для ноутбуков и планшетов", "Ноутбуки, планшеты и электронные книги>Запчасти для ноутбуков и планшетов"),
+                Map.entry("Аккумуляторы для ноутбуков", "Ноутбуки, планшеты и электронные книги>Аккумуляторы для ноутбуков"),
+                Map.entry("Зарядные устройства", "Ноутбуки, планшеты и электронные книги>Зарядные устройства"),
+                Map.entry("Чехлы для электронных книг", "Ноутбуки, планшеты и электронные книги>Чехлы для электронных книг"),
+                Map.entry("Электронные переводчики и словари", "Ноутбуки, планшеты и электронные книги>Электронные переводчики и словари")
+        ));
+
+        for (String tableName : rawData.keySet()) {
+            String categoryPath = "Прочее>Разное";
+
+            for (Map.Entry<String, String> entry : categoryMapping.entrySet()) {
+                if (tableName.contains(entry.getKey())) {
+                    categoryPath = entry.getValue();
+                    break;
+                }
+            }
+
+            String[] levels = categoryPath.split(">");
+            String mainCategory = levels[0];
+            String subCategory = levels[1];
+
+            categoryProducts
+                    .computeIfAbsent(mainCategory, k -> new LinkedHashMap<>())
+                    .computeIfAbsent(subCategory, k -> new LinkedHashMap<>())
+                    .computeIfAbsent(tableName, k -> new LinkedHashMap<>());
+        }
+
+        return categoryProducts;
     }
 }

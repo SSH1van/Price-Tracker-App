@@ -2,12 +2,30 @@ let chart;
 let tempElements = null;
 let tempCategoryName = null;
 const applyButton = document.getElementById('apply-button');
-const filterInput = document.getElementById("filterInput");
+const filterInput = document.getElementById("filter-input");
 const table = document.getElementById("product-table").getElementsByTagName("tbody")[0];
 const header = document.getElementById("selected-table");
 const rowSlider = document.getElementById("row-slider");
 const rowCountDisplay = document.getElementById("row-count");
-const overlay = document.getElementById('loadingOverlay');
+const overlay = document.getElementById('loading-overlay');
+/************************************************
+ *          ВЫПОЛНЯЕТСЯ ПРИ ЗАГРУЗКЕ            *
+ ************************************************/
+// При загрузке страницы получаем диапазон дат, в котором можно выбирать периоды
+if (availableDates.length > 0) {
+    const startDateInput = document.getElementById("start-date");
+    const endDateInput = document.getElementById("end-date");
+
+    startDateInput.value = availableDates[0];
+    endDateInput.value = availableDates[availableDates.length - 1];
+
+    // Ограничиваем выбор дат
+    startDateInput.min = availableDates[0];
+    startDateInput.max = availableDates[availableDates.length - 1];
+
+    endDateInput.min = availableDates[0];
+    endDateInput.max = availableDates[availableDates.length - 1];
+}
 
 /************************************************
  *             ОТОБРАЖЕНИЕ ТАБЛИЦЫ              *
@@ -242,10 +260,94 @@ function runWithLoading(action) {
 
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            action();
-            overlay.classList.remove('active');
+            const result = action();
+            if (result instanceof Promise) {
+                result.finally(() => overlay.classList.remove('active'));
+            } else {
+                overlay.classList.remove('active');
+            }
         });
     });
+}
+
+// Отрисовка загруженных данных
+function renderCategories() {
+    const categoryList = document.getElementById("category-list");
+    categoryList.innerHTML = "";
+
+    const categories = window.categories;
+
+    if (!categories || Object.keys(categories).length === 0) {
+        categoryList.innerHTML = "<li>Категории не найдены</li>";
+        return;
+    }
+
+    for (const mainCategory in categories) {
+        const mainLi = document.createElement("li");
+        mainLi.classList.add("category-item");
+
+        const mainToggle = document.createElement("span");
+        mainToggle.classList.add("toggle-btn");
+        mainToggle.textContent = "▶";
+        mainToggle.onclick = () => mainUl.classList.toggle("nested");
+
+        const mainTitle = document.createElement("strong");
+        mainTitle.textContent = mainCategory;
+
+        const mainUl = document.createElement("ul");
+        mainUl.classList.add("nested");
+
+        for (const subCategory in categories[mainCategory]) {
+            const subLi = document.createElement("li");
+            subLi.classList.add("subcategory-item");
+
+            const subToggle = document.createElement("span");
+            subToggle.classList.add("toggle-btn");
+            subToggle.textContent = "▶";
+            subToggle.onclick = () => subUl.classList.toggle("nested");
+
+            const subTitle = document.createElement("span");
+            subTitle.textContent = subCategory;
+
+            const subUl = document.createElement("ul");
+            subUl.classList.add("nested");
+
+            for (const item in categories[mainCategory][subCategory]) {
+                const itemLi = document.createElement("li");
+                itemLi.setAttribute("data-category", item);
+
+                const itemLink = document.createElement("a");
+                itemLink.textContent = item;
+
+                itemLi.appendChild(itemLink);
+                subUl.appendChild(itemLi);
+            }
+
+            subLi.appendChild(subToggle);
+            subLi.appendChild(subTitle);
+            subLi.appendChild(subUl);
+            mainUl.appendChild(subLi);
+        }
+
+        mainLi.appendChild(mainToggle);
+        mainLi.appendChild(mainTitle);
+        mainLi.appendChild(mainUl);
+        categoryList.appendChild(mainLi);
+    }
+}
+
+// Запрос о получении данных
+function post(startDate, endDate) {
+    return fetch(`/load-data?startDate=${startDate}&endDate=${endDate}`)
+        .then(response => response.json())
+        .then(responseData => {
+            window.data = responseData.data;
+            window.categories = responseData.categories;
+            renderCategories();
+        })
+        .catch(error => {
+            console.error("Ошибка загрузки данных:", error);
+        })
 }
 
 /************************************************
@@ -404,4 +506,20 @@ document.querySelectorAll('#price-diff-options input[name="diffOption"]').forEac
 // Событие изменения значения слайдера количества ссылок
 rowSlider.addEventListener("input", () => {
     rowCountDisplay.textContent = rowSlider.value;
+});
+
+// Событие загрузки данных в установленном диапазоне
+document.getElementById("load-data-btn").addEventListener("click", function () {
+    document.getElementById('category-list').innerHTML = '';
+    table.innerHTML = "";
+
+    let startDate = document.getElementById("start-date").value;
+    let endDate = document.getElementById("end-date").value;
+
+    if (!startDate || !endDate) {
+        alert("Выберите диапазон дат!");
+        return;
+    }
+
+    runWithLoading(() => post(startDate, endDate));
 });

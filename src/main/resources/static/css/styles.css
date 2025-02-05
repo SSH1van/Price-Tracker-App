@@ -16,23 +16,86 @@ li::marker {
 a {
     text-decoration: none;
 }
+ul {
+    padding-left: 0;
+}
+ul ul {
+    padding-left: 20px;
+}
 
 /* ========== Основной контейнер ========== */
 #main-container {
     display: grid;
-    grid-template-columns: 1fr 4fr;
+    grid-template-columns: 1fr 3.5fr;
     gap: 20px;
     width: 95%;
     margin-top: 20px;
 }
 
+/* ========== Левая панель с фильтром по дате и категориям ========== */
+#date-filter-and-category {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 870px;
+}
+
+/* ========== Фильтр дат ========== */
+#date-filter {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+}
+
+#date-filter div {
+    display: flex;
+    flex-direction: column;
+}
+
+#date-filter label {
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+#date-filter input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#load-data-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#load-data-btn:hover {
+    background: #0056b3;
+}
+
 /* ========== Блок категорий ========== */
 #category-container {
     flex: 1;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    min-height: 0;
 }
+
 #category-list {
     list-style-type: none;
-    padding: 0;
     margin: 0;
     font-size: 14px;
 }
@@ -60,10 +123,10 @@ a {
     color: #fff;
     cursor: pointer;
 }
-.subcategory-item .nested li {
+.subcategory-item ul li {
     transition: all 0.3s ease;
 }
-.subcategory-item .nested li:hover {
+.subcategory-item ul li:hover {
     background-color: #000;
     color: #fff;
     cursor: pointer;
@@ -101,11 +164,16 @@ a {
 
 /* ========== Таблица товаров ========== */
 #table-container {
+    height: 850px;
     grid-column: 1;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 #scrollable-table-container {
     font-size: 16px;
-    max-height: 750px;
+    max-height: 790px;
     overflow-y: auto;
     overflow-x: hidden;
     border: 1px solid #ccc;
@@ -152,17 +220,33 @@ td a:hover {
 
 /* ========== Блок фильтров ========== */
 #filters-container {
-    grid-column: 2;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 #price-diff-options {
     display: grid;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .radio-button {
     cursor: pointer;
     margin-top: 10px;
+}
+.radio-button input {
+    cursor: pointer;
+}
+
+.filter-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #row-container {
@@ -211,7 +295,12 @@ td a:hover {
 }
 
 /* ========== Поле ввода для фильтрации ссылок ========== */
-#filterInput {
+#input-container {
+    display: flex;
+    justify-items: center;
+}
+
+#filter-input {
     width: 100%;
     font-size: 16px;
     padding: 5px;
@@ -223,26 +312,31 @@ td a:hover {
     justify-content: center;
 }
 #apply-button {
-    background-color: #fff;
-    color: #000;
-    font-size: 16px;
+    width: 100%;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
     cursor: pointer;
-    border-radius: 5px;
-    padding: 5px 20px;
-    transition: all 0.3s ease;
+    transition: background 0.3s;
 }
 
 #apply-button:hover {
-    background-color: #000;
-    color: #fff;
+    background: #0056b3;
 }
 
 /* ========== График изменения цен ========== */
 #chart-container {
     flex: 1;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 #chart-container canvas {
     max-width: 100%;
+    margin-top: 50px;
 }
 
 /* ========== Окно загрузки ========== */

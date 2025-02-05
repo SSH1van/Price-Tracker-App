@@ -21,32 +21,28 @@
 <body>
 
 <div id="main-container">
-    <!-- Список категорий -->
-    <div id="category-container">
-        <h3>Список категорий</h3>
-        <ul id="category-list">
-            <!-- Главная категория -->
-            <li th:each="mainCategory : ${categories.keySet()}" class="category-item">
-                <span class="toggle-btn">▶</span>
-                <strong th:text="${mainCategory}"></strong>
-                <ul class="nested">
-                    <!-- Подкатегория -->
-                    <li th:each="subCategory : ${categories.get(mainCategory).keySet()}" class="subcategory-item">
-                        <span class="toggle-btn">▶</span>
-                        <span th:text="${subCategory}"></span>
-                        <ul class="nested">
-                            <!-- Название группы товаров -->
-                            <li th:each="item : ${categories.get(mainCategory).get(subCategory).keySet()}" th:attr="data-category=${item}">
-                                <a>
-                                    <span th:text="${item}"></span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-        </ul>
+    <div id="date-filter-and-category">
+        <div id="date-filter">
+            <div>
+                <label for="start-date">Начальная дата:</label>
+                <input type="date" id="start-date">
+            </div>
+            <div>
+                <label for="end-date">Конечная дата:</label>
+                <input type="date" id="end-date">
+            </div>
+            <button id="load-data-btn">Загрузить данные</button>
+        </div>
+
+        <!-- Список категорий -->
+        <div id="category-container">
+            <h3>Список категорий</h3>
+            <ul id="category-list">
+                <!-- Категории будут добавляться динамически -->
+            </ul>
+        </div>
     </div>
+
 
     <!-- Контейнер контента (таблица, фильтры, график) -->
     <section id="content-container">
@@ -76,53 +72,56 @@
             <div id="price-diff-options">
                 <h3>Выбор режима сравнения цен:</h3>
                 <label class="radio-button">
-                    <input type="radio" name="diffOption" value="start-last" checked="checked"> Первая-последняя
+                    <input type="radio" name="diffOption" value="penultimate-last" checked="checked"> Предпоследняя-последняя
                 </label>
                 <label class="radio-button">
-                    <input type="radio" name="diffOption" value="penultimate-last"> Предпоследняя-последняя
+                    <input type="radio" name="diffOption" value="start-last"> Первая-последняя
                 </label>
             </div>
 
-            <!-- Фильтр цен -->
-            <h3>Фильтры:</h3>
-            <div id="sliders">
+            <div class="filter-inner">
+                <!-- Фильтр цен -->
+                <h3>Фильтры:</h3>
+                <div id="sliders">
+                    <div>
+                        <section class="range-slider">
+                            <label>Последняя цена:</label>
+                            <input type="number" class="min-input" value="0" min="0" max="50000" step="1">
+                            <input type="number" class="max-input" value="50000" min="0" max="50000" step="1">
+                            <input type="range" class="min-slider" value="0" min="0" max="50000" step="1">
+                            <input type="range" class="max-slider" value="50000" min="0" max="50000" step="1">
+                        </section>
+                    </div>
+                    <div>
+                        <section class="range-slider">
+                            <label>Разница цен:</label>
+                            <input type="number" class="min-input" value="0" min="0" max="50000" step="1">
+                            <input type="number" class="max-input" value="50000" min="0" max="50000" step="1">
+                            <input type="range" class="min-slider" value="0" min="0" max="50000" step="1">
+                            <input type="range" class="max-slider" value="50000" min="0" max="50000" step="1">
+                        </section>
+                    </div>
+                </div>
+
+                <!-- Фильтр ссылок -->
+                <div id="input-container">
+                    <input type="text" id="filter-input" placeholder="Фильтрация по ссылкам">
+                </div>
+
+                <!-- Фильтр по количеству отображаемых строк -->
                 <div>
-                    <section class="range-slider">
-                        <label>Последняя цена:</label>
-                        <input type="number" class="min-input" value="0" min="0" max="50000" step="1">
-                        <input type="number" class="max-input" value="50000" min="0" max="50000" step="1">
-                        <input type="range" class="min-slider" value="0" min="0" max="50000" step="1">
-                        <input type="range" class="max-slider" value="50000" min="0" max="50000" step="1">
-                    </section>
+                    <label for="row-slider">Количество отображаемых строк:</label>
+                    <div id="row-container">
+                        <input type="range" id="row-slider" min="10" max="2000" value="500">
+                        <div id="row-count">500</div>
+                    </div>
                 </div>
-                <div>
-                    <section class="range-slider">
-                        <label>Разница цен:</label>
-                        <input type="number" class="min-input" value="0" min="0" max="50000" step="1">
-                        <input type="number" class="max-input" value="50000" min="0" max="50000" step="1">
-                        <input type="range" class="min-slider" value="0" min="0" max="50000" step="1">
-                        <input type="range" class="max-slider" value="50000" min="0" max="50000" step="1">
-                    </section>
+
+                <div id="apply-container">
+                    <button id="apply-button">Применить фильтры</button>
                 </div>
             </div>
 
-            <!-- Фильтр ссылок -->
-            <div>
-                <input type="text" id="filterInput" placeholder="Введите текст для фильтрации по ссылкам...">
-            </div>
-
-            <!-- Фильтр по количеству отображаемых строк -->
-            <div>
-                <label for="row-slider">Количество отображаемых строк:</label>
-                <div id="row-container">
-                    <input type="range" id="row-slider" min="10" max="2000" value="500">
-                    <div id="row-count">500</div>
-                </div>
-            </div>
-
-            <div id="apply-container">
-                <button id="apply-button">Применить фильтры</button>
-            </div>
 
             <!-- График изменения цен -->
             <div id="chart-container">
@@ -134,13 +133,15 @@
 </div>
 
 <!-- Окно загрузки -->
-<div class="overlay" id="loadingOverlay">
+<div class="overlay" id="loading-overlay">
     <div class="loader"></div>
 </div>
 
-<!-- Подгрузка данных извлечённых из таблицы -->
+<!-- Подгрузка данных извлечённых из БД -->
 <script th:inline="javascript">
-    const data = /*[[${data}]]*/ {};
+    window.availableDates = /*[[${availableDates}]]*/ [];
+    window.data = {};
+    window.categories = {};
 </script>
 
 </body>
