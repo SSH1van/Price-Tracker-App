@@ -8,7 +8,8 @@ const header = document.getElementById("selected-table");
 const rowSlider = document.getElementById("row-slider");
 const rowCountDisplay = document.getElementById("row-count");
 const overlay = document.getElementById('loading-overlay');
-const lastUpdate = document.getElementById('last-update');
+const datetimeInput = document.getElementById("last-update");
+const checkbox = document.getElementById("update-checkbox");
 /************************************************
  *          ВЫПОЛНЯЕТСЯ ПРИ ЗАГРУЗКЕ            *
  ************************************************/
@@ -30,11 +31,10 @@ if (availableDates.length > 0) {
 
 // Получаем диапазон дат и времени, для фильтра по последнему получению цены товара
 if (dateTimeRange) {
-    lastUpdate.value = Object.values(dateTimeRange)[0];
-    lastUpdate.min = Object.keys(dateTimeRange)[0];
-    lastUpdate.max = Object.values(dateTimeRange)[0];
+    datetimeInput.value = Object.values(dateTimeRange)[0];
+    datetimeInput.min = Object.keys(dateTimeRange)[0];
+    datetimeInput.max = Object.values(dateTimeRange)[0];
 }
-
 
 /************************************************
  *             ОТОБРАЖЕНИЕ ТАБЛИЦЫ              *
@@ -85,7 +85,8 @@ function processRow([link, valueList]) {
 
     if (latestPrice < minCurrentPrice || latestPrice > maxCurrentPrice ||
         diffPrice < minPriceDiff || diffPrice > maxPriceDiff ||
-        (filterText && !link.toLowerCase().includes(filterText))) {
+        (filterText && !link.toLowerCase().includes(filterText)) ||
+        (checkbox.checked && formatDate(valueList.at(-1).timestamp) < datetimeInput.value)) {
         return "";
     }
 
@@ -415,7 +416,14 @@ function formatDate(input) {
 
     const date = new Date(year, month - 1, day, hour, minute, second);
 
-    return date.toISOString().slice(0, 19);
+    const yyyy = date.getFullYear();
+    const MM = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+
+    return `${yyyy}-${MM}-${dd}T${hh}:${mm}:${ss}`;
 }
 
 /************************************************
