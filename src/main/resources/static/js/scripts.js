@@ -563,16 +563,4 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Событие переключения checkbox последнего обновления цены
-document.addEventListener("DOMContentLoaded", function () {
-    const checkbox = document.getElementById("update-checkbox");
-    const datetimeInput = document.getElementById("last-update");
-
-    function toggleDateTimeInput() {
-        datetimeInput.disabled = !checkbox.checked;
-    }
-
-    checkbox.addEventListener("change", toggleDateTimeInput);
-
-    // Устанавливаем начальное состояние
-    toggleDateTimeInput();
-});
+checkbox.addEventListener("change", () => datetimeInput.disabled = !checkbox.checked);
