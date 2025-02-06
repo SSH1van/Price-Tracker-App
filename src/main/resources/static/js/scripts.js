@@ -8,6 +8,7 @@ const header = document.getElementById("selected-table");
 const rowSlider = document.getElementById("row-slider");
 const rowCountDisplay = document.getElementById("row-count");
 const overlay = document.getElementById('loading-overlay');
+const lastUpdate = document.getElementById('last-update');
 /************************************************
  *          ВЫПОЛНЯЕТСЯ ПРИ ЗАГРУЗКЕ            *
  ************************************************/
@@ -26,6 +27,14 @@ if (availableDates.length > 0) {
     endDateInput.min = availableDates[0];
     endDateInput.max = availableDates[availableDates.length - 1];
 }
+
+// Получаем диапазон дат и времени, для фильтра по последнему получению цены товара
+if (dateTimeRange) {
+    lastUpdate.value = Object.values(dateTimeRange)[0];
+    lastUpdate.min = Object.keys(dateTimeRange)[0];
+    lastUpdate.max = Object.values(dateTimeRange)[0];
+}
+
 
 /************************************************
  *             ОТОБРАЖЕНИЕ ТАБЛИЦЫ              *
@@ -368,7 +377,7 @@ function showChart(selectedTableId, product) {
         fill: false
     };
 
-    const ctx = document.getElementById('priceChart').getContext('2d');
+    const ctx = document.getElementById('price-chart').getContext('2d');
     if (chart) {
         chart.data.datasets = [dataset];
         chart.update();
@@ -522,4 +531,40 @@ document.getElementById("load-data-btn").addEventListener("click", function () {
     }
 
     runWithLoading(() => post(startDate, endDate));
+});
+
+// Событие корректировки диапазона min max для фильтра последнего обновления цены
+document.addEventListener("DOMContentLoaded", function () {
+    let lastUpdate = document.getElementById("last-update");
+
+    let minTime = lastUpdate.min;
+    let maxTime = lastUpdate.max;
+
+    // Если текущее значение выходит за пределы min/max — корректируем
+    if (lastUpdate.value < minTime) {
+        lastUpdate.value = minTime;
+    } else if (lastUpdate.value > maxTime) {
+        lastUpdate.value = maxTime;
+    }
+
+    // Запрещаем ввод за пределами min/max
+    lastUpdate.addEventListener("input", function () {
+        if (this.value < this.min) this.value = this.min;
+        if (this.value > this.max) this.value = this.max;
+    });
+});
+
+// Событие переключения checkbox последнего обновления цены
+document.addEventListener("DOMContentLoaded", function () {
+    const checkbox = document.getElementById("update-checkbox");
+    const datetimeInput = document.getElementById("last-update");
+
+    function toggleDateTimeInput() {
+        datetimeInput.disabled = !checkbox.checked;
+    }
+
+    checkbox.addEventListener("change", toggleDateTimeInput);
+
+    // Устанавливаем начальное состояние
+    toggleDateTimeInput();
 });

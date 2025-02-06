@@ -22,6 +22,7 @@
 
 <div id="main-container">
     <div id="date-filter-and-category">
+        <!-- Фильтр загружаемых данных в установленном диапазоне -->
         <div id="date-filter">
             <div>
                 <label for="start-date">Начальная дата:</label>
@@ -80,23 +81,36 @@
             </div>
 
             <div class="filter-inner">
-                <!-- Фильтр цен -->
                 <h3>Фильтры:</h3>
+                <!-- Фильтр по последнему обновлению цены -->
+                <div id="last-price-time">
+                    <label for="last-update">Последнее обновление цены от:</label>
+                    <div id="last-price-time-inner">
+                        <input type="checkbox" id="update-checkbox" checked>
+                        <input type="datetime-local" id="last-update">
+                    </div>
+                </div>
+
+                <!-- Фильтр цен -->
                 <div id="sliders">
                     <div>
                         <section class="range-slider">
-                            <label>Последняя цена:</label>
-                            <input type="number" class="min-input" value="0" min="0" max="50000" step="1">
-                            <input type="number" class="max-input" value="50000" min="0" max="50000" step="1">
+                            <div class="range-slider-inner">
+                                <label>Последняя цена:</label>
+                                <input type="number" class="min-input" value="0" min="0" max="50000" step="1">
+                                <input type="number" class="max-input" value="50000" min="0" max="50000" step="1">
+                            </div>
                             <input type="range" class="min-slider" value="0" min="0" max="50000" step="1">
                             <input type="range" class="max-slider" value="50000" min="0" max="50000" step="1">
                         </section>
                     </div>
                     <div>
                         <section class="range-slider">
-                            <label>Разница цен:</label>
-                            <input type="number" class="min-input" value="0" min="0" max="50000" step="1">
-                            <input type="number" class="max-input" value="50000" min="0" max="50000" step="1">
+                            <div class="range-slider-inner">
+                                <label>Разница цен:</label>
+                                <input type="number" class="min-input" value="0" min="0" max="50000" step="1">
+                                <input type="number" class="max-input" value="50000" min="0" max="50000" step="1">
+                            </div>
                             <input type="range" class="min-slider" value="0" min="0" max="50000" step="1">
                             <input type="range" class="max-slider" value="50000" min="0" max="50000" step="1">
                         </section>
@@ -126,7 +140,7 @@
             <!-- График изменения цен -->
             <div id="chart-container">
                 <h3>График изменения цен</h3>
-                <canvas id="priceChart"></canvas>
+                <canvas id="price-chart"></canvas>
             </div>
         </aside>
     </section>
@@ -140,6 +154,7 @@
 <!-- Подгрузка данных извлечённых из БД -->
 <script th:inline="javascript">
     window.availableDates = /*[[${availableDates}]]*/ [];
+    window.dateTimeRange = /*[[${dateTimeRange}]]*/ [];
     window.data = {};
     window.categories = {};
 </script>

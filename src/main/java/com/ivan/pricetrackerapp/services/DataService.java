@@ -6,6 +6,9 @@ import java.nio.file.*;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,26 @@ public class DataService {
                 .distinct()
                 .sorted()
                 .toList();
+    }
+
+    // Извлечение диапазона даты и времени получения цены товаров
+    public Map.Entry<String, String> getDateTimeRange(String directoryPath) {
+        File dir = new File(directoryPath);
+        if (!dir.exists() || !dir.isDirectory()) return new AbstractMap.SimpleEntry<>("", "");
+
+        String[] folders = dir.list();
+        if (folders == null || folders.length == 0) return new AbstractMap.SimpleEntry<>("", "");
+
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
+        Optional<String> minFolder = Arrays.stream(folders).min(Comparator.naturalOrder());
+        Optional<String> maxFolder = Arrays.stream(folders).max(Comparator.naturalOrder());
+
+        String minDateTime = minFolder.map(f -> LocalDateTime.parse(f, inputFormatter).format(outputFormatter)).orElse("");
+        String maxDateTime = maxFolder.map(f -> LocalDateTime.parse(f, inputFormatter).format(outputFormatter)).orElse("");
+
+        return new AbstractMap.SimpleEntry<>(minDateTime, maxDateTime);
     }
 
     // Загрузить данные в указанном диапазоне дат

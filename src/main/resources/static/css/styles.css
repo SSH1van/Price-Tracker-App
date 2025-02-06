@@ -22,6 +22,9 @@ ul {
 ul ul {
     padding-left: 20px;
 }
+h3 {
+    margin: 10px 0;
+}
 
 /* ========== Основной контейнер ========== */
 #main-container {
@@ -293,6 +296,37 @@ td a:hover {
     text-align: center;
     align-content: center;
 }
+/* ========== Фильтр по последнему обновлению цены ========== */
+#last-price-time label {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 8px;
+    display: block;
+}
+
+#last-price-time-inner {
+    display: flex;
+    align-items: center;
+}
+
+#last-price-time-inner input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+#last-price-time-inner input[type="datetime-local"] {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #333;
+}
+#last-price-time-inner input[type="datetime-local"]:disabled {
+    opacity: 0.5;
+}
 
 /* ========== Поле ввода для фильтрации ссылок ========== */
 #input-container {
@@ -304,6 +338,8 @@ td a:hover {
     width: 100%;
     font-size: 16px;
     padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 /* ========== Кнопка применения фильтров ========== */
@@ -336,7 +372,7 @@ td a:hover {
 }
 #chart-container canvas {
     max-width: 100%;
-    margin-top: 50px;
+    margin-top: 30px;
 }
 
 /* ========== Окно загрузки ========== */
