@@ -2,8 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <title>Трекер цен OZON</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/slider.css">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/slider.css">
 
     <link rel="icon" type="image/png" href="/img/favicon/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/img/favicon/favicon.svg" />
@@ -19,9 +19,8 @@
     <script src="/js/slider.js" defer></script>
 </head>
 <body>
-
 <!-- Форма для выхода -->
-<form th:action="@{/logout}" method="post">
+<form th:action="@{/logout}" method="post" id="logout">
     <button type="submit">Выйти</button>
 </form>
 
