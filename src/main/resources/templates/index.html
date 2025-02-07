@@ -20,6 +20,11 @@
 </head>
 <body>
 
+<!-- Форма для выхода -->
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Выйти</button>
+</form>
+
 <div id="main-container">
     <div id="date-filter-and-category">
         <!-- Фильтр загружаемых данных в установленном диапазоне -->

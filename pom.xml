@@ -19,21 +19,28 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.4.1</version>
+            <version>3.4.2</version>
         </dependency>
 
         <!-- Thymeleaf для работы с шаблонами -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>3.4.1</version>
+            <version>3.4.2</version>
+        </dependency>
+
+        <!-- Spring Boot Starter Security для защиты -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>3.4.2</version>
         </dependency>
 
         <!-- Spring Boot Starter Test для тестирования -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>3.4.1</version>
+            <version>3.4.2</version>
             <scope>test</scope>
         </dependency>
 
