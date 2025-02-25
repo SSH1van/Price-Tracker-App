@@ -78,7 +78,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>com.ivan.pricetrackerapp.WebAppApplication</mainClass>
+                            <mainClass>com.ivan.pricetrackerapp.WebApplication</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
