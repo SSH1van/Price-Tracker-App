@@ -347,7 +347,7 @@ function renderCategories() {
 }
 
 // Запрос о получении данных
-function post(startDate, endDate) {
+function get(startDate, endDate) {
     return fetch(`/load-data?startDate=${startDate}&endDate=${endDate}`)
         .then(response => response.json())
         .then(responseData => {
@@ -538,7 +538,7 @@ document.getElementById("load-data-btn").addEventListener("click", function () {
         return;
     }
 
-    runWithLoading(() => post(startDate, endDate));
+    runWithLoading(() => get(startDate, endDate));
 });
 
 // Событие корректировки диапазона min max для фильтра последнего обновления цены
