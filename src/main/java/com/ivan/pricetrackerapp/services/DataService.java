@@ -21,6 +21,7 @@ public class DataService {
         if (!dir.exists() || !dir.isDirectory()) return Collections.emptyList();
 
         return Arrays.stream(Objects.requireNonNull(dir.list()))
+                .filter(name -> name.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}"))
                 .map(name -> name.split("_")[0])
                 .distinct()
                 .sorted()
@@ -32,7 +33,8 @@ public class DataService {
         File dir = new File(directoryPath);
         if (!dir.exists() || !dir.isDirectory()) return new AbstractMap.SimpleEntry<>("", "");
 
-        String[] folders = dir.list();
+        String[] folders = dir.list((file, name) -> name.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}")); // Фильтр
+
         if (folders == null || folders.length == 0) return new AbstractMap.SimpleEntry<>("", "");
 
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
@@ -53,13 +55,15 @@ public class DataService {
 
         try (Stream<Path> folders = Files.list(Paths.get(resultsDir))) {
             folders.filter(Files::isDirectory)
-                    .forEach(folder -> {
-                        String folderName = folder.getFileName().toString();
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .filter(name -> name.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}")) // Проверка формата
+                    .forEach(folderName -> {
                         try {
-                            String datePart = folderName.split("_")[0]; // Берем только дату из названия
+                            String datePart = folderName.split("_")[0]; // Берем только дату
                             LocalDate folderDate = LocalDate.parse(datePart);
                             if (!folderDate.isBefore(start) && !folderDate.isAfter(end)) {
-                                Path dbPath = folder.resolve("products.db");
+                                Path dbPath = Paths.get(resultsDir, folderName, "products.db");
                                 if (Files.exists(dbPath)) {
                                     extractDataFromDB(dbPath.toString(), folderName, data);
                                 }
