@@ -1,64 +1,96 @@
 package com.ivan.pricetrackerapp.services;
 
-import java.sql.*;
-import java.util.*;
-import java.nio.file.*;
-
-import java.io.File;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
-import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.zaxxer.hikari.HikariDataSource;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
-public class DataService {
+public class DatabaseService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
+    private final HikariDataSource dataSource;
+    private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private static final DateTimeFormatter INPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
-    // Извлечение диапазона даты и времени получения цены товаров
-    public Map.Entry<String, String> getDateTimeRange(String directoryPath) {
-        File dir = new File(directoryPath);
-        if (!dir.exists() || !dir.isDirectory()) return new AbstractMap.SimpleEntry<>("", "");
-
-        String[] folders = dir.list((file, name) -> name.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}")); // Фильтр
-
-        if (folders == null || folders.length == 0) return new AbstractMap.SimpleEntry<>("", "");
-
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-
-        Optional<String> minFolder = Arrays.stream(folders).min(Comparator.naturalOrder());
-        Optional<String> maxFolder = Arrays.stream(folders).max(Comparator.naturalOrder());
-
-        String minDateTime = minFolder.map(f -> LocalDateTime.parse(f, inputFormatter).format(outputFormatter)).orElse("");
-        String maxDateTime = maxFolder.map(f -> LocalDateTime.parse(f, inputFormatter).format(outputFormatter)).orElse("");
-
-        return new AbstractMap.SimpleEntry<>(minDateTime, maxDateTime);
+    @Autowired
+    public DatabaseService(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
-    // Загрузить данные в указанном диапазоне дат
-    public Map<String, Map<String, List<Map<String, Object>>>> loadDataInRange(String resultsDir, LocalDate start, LocalDate end) {
-        Map<String, Map<String, List<Map<String, Object>>>> data = new HashMap<>();
+    public Map.Entry<String, String> getDateTimeRange() {
+        String sql = "SELECT MIN(date) as min_date, MAX(date) as max_date FROM product_prices";
 
-        try (Stream<Path> folders = Files.list(Paths.get(resultsDir))) {
-            folders.filter(Files::isDirectory)
-                    .map(Path::getFileName)
-                    .map(Path::toString)
-                    .filter(name -> name.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}")) // Проверка формата
-                    .forEach(folderName -> {
-                        try {
-                            String datePart = folderName.split("_")[0]; // Берем только дату
-                            LocalDate folderDate = LocalDate.parse(datePart);
-                            if (!folderDate.isBefore(start) && !folderDate.isAfter(end)) {
-                                Path dbPath = Paths.get(resultsDir, folderName, "products.db");
-                                if (Files.exists(dbPath)) {
-                                    extractDataFromDB(dbPath.toString(), folderName, data);
-                                }
-                            }
-                        } catch (Exception ignored) {}
-                    });
-        } catch (Exception e) {
-            System.out.println("Ошибка загрузки данных: " + e.getMessage());
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            if (rs.next()) {
+                Timestamp minTimestamp = rs.getTimestamp("min_date");
+                Timestamp maxTimestamp = rs.getTimestamp("max_date");
+
+                String minDateTime = minTimestamp != null
+                        ? minTimestamp.toLocalDateTime().format(OUTPUT_FORMATTER)
+                        : "";
+                String maxDateTime = maxTimestamp != null
+                        ? maxTimestamp.toLocalDateTime().format(OUTPUT_FORMATTER)
+                        : "";
+
+                return new AbstractMap.SimpleEntry<>(minDateTime, maxDateTime);
+            }
+
+        } catch (SQLException e) {
+            LOGGER.error("Ошибка при получении диапазона дат", e);
+        }
+
+        return new AbstractMap.SimpleEntry<>("", "");
+    }
+
+
+    // Извлечение данных из PostgreSQL в указанном диапазоне дат
+    public Map<String, Map<String, List<Map<String, Object>>>> loadDataInRange(LocalDate start, LocalDate end) {
+        Map<String, Map<String, List<Map<String, Object>>>> data = new HashMap<>();
+        String sql = "SELECT c.name AS category_name, p.url AS product_url, pp.price, pp.date " +
+                "FROM product_prices pp " +
+                "JOIN products p ON pp.product_id = p.id " +
+                "JOIN categories c ON p.category_id = c.id " +
+                "WHERE pp.date >= ? AND pp.date <= ?";
+
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setTimestamp(1, Timestamp.valueOf(start.atStartOfDay()));
+            pstmt.setTimestamp(2, Timestamp.valueOf(end.plusDays(1).atStartOfDay())); // Включаем весь последний день
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String categoryName = rs.getString("category_name");
+                    String productUrl = rs.getString("product_url");
+                    int price = rs.getInt("price");
+                    String timestamp = rs.getTimestamp("date")
+                            .toLocalDateTime()
+                            .format(INPUT_FORMATTER); // Соответствует исходному формату
+
+                    // Создаем структуру данных, аналогичную SQLite (categoryName вместо tableName)
+                    data.computeIfAbsent(categoryName, k -> new HashMap<>())
+                            .computeIfAbsent(productUrl, k -> new ArrayList<>())
+                            .add(Map.of(
+                                    "timestamp", timestamp,
+                                    "price", price
+                            ));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Ошибка при загрузке данных из PostgreSQL", e);
         }
 
         filterData(data);
@@ -92,49 +124,6 @@ public class DataService {
             if (tableData.isEmpty()) {
                 dataIterator.remove();
             }
-        }
-    }
-
-    private void extractDataFromDB(String dbPath, String timestamp, Map<String, Map<String, List<Map<String, Object>>>> data) {
-        try (Connection conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath)) {
-            DatabaseMetaData meta = conn.getMetaData();
-
-            // Получаем список всех таблиц
-            try (ResultSet tables = meta.getTables(null, null, "%", new String[]{"TABLE"})) {
-                while (tables.next()) {
-                    String tableName = tables.getString("TABLE_NAME");
-                    if (!"sqlite_sequence".equals(tableName)) {
-                        extractTableData(conn, tableName, timestamp, data);
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Возникла ошибка: " + e.getMessage());
-        }
-    }
-
-    private void extractTableData(Connection conn, String tableName, String timestamp, Map<String, Map<String, List<Map<String, Object>>>> data) {
-        String query = "SELECT price, link FROM \"" + tableName + "\"";
-        try (PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-
-            // Убедимся, что структура данных для таблицы существует
-            data.computeIfAbsent(tableName, k -> new HashMap<>());
-
-            while (rs.next()) {
-                String link = rs.getString("link");
-                int price = rs.getInt("price");
-
-                // Добавляем данные в структуру, соответствующую таблице и ссылке
-                data.get(tableName)
-                        .computeIfAbsent(link, k -> new ArrayList<>())
-                        .add(Map.of(
-                                "timestamp", timestamp,
-                                "price", price
-                        ));
-            }
-        } catch (SQLException e) {
-            System.out.println("Возникла ошибка при обработке таблицы " + tableName + ": " + e.getMessage());
         }
     }
 

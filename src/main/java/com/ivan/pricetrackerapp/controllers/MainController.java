@@ -1,5 +1,4 @@
 package com.ivan.pricetrackerapp.controllers;
-import com.ivan.pricetrackerapp.services.DataService;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -13,17 +12,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.ivan.pricetrackerapp.services.DatabaseService;
 
 @Controller
 public class MainController {
     String resultsDir = "results";
 
     @Autowired
-    private DataService dataService;
+    private DatabaseService databaseService;
 
     @GetMapping("/")
     public String index(Model model) {
-        Map.Entry<String, String> dateTimeRange = dataService.getDateTimeRange(resultsDir);
+        Map.Entry<String, String> dateTimeRange = databaseService.getDateTimeRange();
 
         model.addAttribute("dateTimeRange", dateTimeRange);
         return "index";
@@ -39,8 +39,8 @@ public class MainController {
         LocalDate start = LocalDate.parse(startDate, formatter);
         LocalDate end = LocalDate.parse(endDate, formatter);
 
-        var data = dataService.loadDataInRange(resultsDir, start, end);
-        var categories = dataService.getStructuredCategories(data);
+        var data = databaseService.loadDataInRange(start, end);
+        var categories = databaseService.getStructuredCategories(data);
 
         Map<String, Object> response = new HashMap<>();
         response.put("data", data);

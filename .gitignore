@@ -36,7 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
-results
 
 ### Project ###
 application.properties
