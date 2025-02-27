@@ -23,12 +23,8 @@ public class MainController {
 
     @GetMapping("/")
     public String index(Model model) {
-        var availableDates = dataService.getAvailableDates(resultsDir);
         Map.Entry<String, String> dateTimeRange = dataService.getDateTimeRange(resultsDir);
 
-        model.addAttribute("availableDates", availableDates);
-        model.addAttribute("minDateTime", dateTimeRange.getKey());
-        model.addAttribute("maxDateTime", dateTimeRange.getValue());
         model.addAttribute("dateTimeRange", dateTimeRange);
         return "index";
     }

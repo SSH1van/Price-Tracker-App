@@ -10,23 +10,27 @@ const rowCountDisplay = document.getElementById("row-count");
 const overlay = document.getElementById('loading-overlay');
 const datetimeInput = document.getElementById("last-update");
 const checkbox = document.getElementById("update-checkbox");
+
 /************************************************
  *          ВЫПОЛНЯЕТСЯ ПРИ ЗАГРУЗКЕ            *
  ************************************************/
-// При загрузке страницы получаем диапазон дат, в котором можно выбирать периоды
-if (availableDates.length > 0) {
+// Получаем диапазон дат, в котором можно выбирать периоды, когда собирались цены
+if (dateTimeRange) {
     const startDateInput = document.getElementById("start-date");
     const endDateInput = document.getElementById("end-date");
 
-    startDateInput.value = availableDates[0];
-    endDateInput.value = availableDates[availableDates.length - 1];
+    // Получаем даты и преобразуем их в формат YYYY-MM-DD
+    const startDate = new Date(Object.keys(dateTimeRange)[0]).toISOString().split('T')[0];
+    const endDate = new Date(Object.values(dateTimeRange)[0]).toISOString().split('T')[0];
+
+    startDateInput.value = startDate;
+    endDateInput.value = endDate;
 
     // Ограничиваем выбор дат
-    startDateInput.min = availableDates[0];
-    startDateInput.max = availableDates[availableDates.length - 1];
-
-    endDateInput.min = availableDates[0];
-    endDateInput.max = availableDates[availableDates.length - 1];
+    startDateInput.min = startDate;
+    startDateInput.max = endDate;
+    endDateInput.min = startDate;
+    endDateInput.max = endDate;
 }
 
 // Получаем диапазон дат и времени, для фильтра по последнему получению цены товара

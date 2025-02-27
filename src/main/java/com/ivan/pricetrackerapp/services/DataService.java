@@ -15,19 +15,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataService {
 
-    // Получение диапазона доступных дат
-    public List<String> getAvailableDates(String directoryPath) {
-        File dir = new File(directoryPath);
-        if (!dir.exists() || !dir.isDirectory()) return Collections.emptyList();
-
-        return Arrays.stream(Objects.requireNonNull(dir.list()))
-                .filter(name -> name.matches("\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}"))
-                .map(name -> name.split("_")[0])
-                .distinct()
-                .sorted()
-                .toList();
-    }
-
     // Извлечение диапазона даты и времени получения цены товаров
     public Map.Entry<String, String> getDateTimeRange(String directoryPath) {
         File dir = new File(directoryPath);
