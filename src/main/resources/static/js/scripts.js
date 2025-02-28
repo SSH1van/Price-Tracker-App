@@ -35,9 +35,22 @@ if (dateTimeRange) {
 
 // Получаем диапазон дат и времени, для фильтра по последнему получению цены товара
 if (dateTimeRange) {
-    datetimeInput.value = Object.values(dateTimeRange)[0];
+    const dateValue = new Date(Object.values(dateTimeRange)[0]);
+
+    // Устанавливаем время в UTC
+    const utcDate = new Date(Date.UTC(
+        dateValue.getUTCFullYear(),
+        dateValue.getUTCMonth(),
+        dateValue.getUTCDate(),
+        0, 0, 0, 0
+    ));
+
+    // Преобразуем в строку в нужном формате
+    const formattedDate = utcDate.toISOString().slice(0, 16);
+
+    datetimeInput.value = formattedDate;
     datetimeInput.min = Object.keys(dateTimeRange)[0];
-    datetimeInput.max = Object.values(dateTimeRange)[0];
+    datetimeInput.max =  Object.values(dateTimeRange)[0];
 }
 
 /************************************************
