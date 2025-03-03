@@ -309,6 +309,18 @@ function renderCategories() {
         return;
     }
 
+    // Добавляем элемент "Все" в начало списка
+    const allLi = document.createElement("li");
+    allLi.classList.add("category-item");
+
+    const allTitle = document.createElement("strong");
+    allTitle.textContent = "Все";
+    allTitle.style.cursor = "pointer";
+
+    allLi.appendChild(allTitle);
+    categoryList.appendChild(allLi);
+
+    // Отрисовка остальных категорий
     for (const mainCategory in categories) {
         const mainLi = document.createElement("li");
         mainLi.classList.add("category-item");
@@ -472,10 +484,17 @@ function processCategoryClick(event) {
         let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn), a');
         let categoryName = categoryNameElement ? categoryNameElement.textContent.trim() : "Категория";
         tempCategoryName = categoryName;
+        let selectedItems;
 
-        // Собираем все вложенные элементы с data-category
-        const nestedItems = categoryItem.querySelectorAll('li[data-category]');
-        const selectedItems = nestedItems.length > 0 ? nestedItems : [categoryItem];
+        // Если выбрано "Все"
+        if (categoryName === "Все") {
+            // Собираем все элементы с data-category из всех категорий
+            selectedItems = document.querySelectorAll('#category-list li[data-category]');
+        } else {
+            // Собираем все вложенные элементы с data-category для выбранной категории
+            const nestedItems = categoryItem.querySelectorAll('li[data-category]');
+            selectedItems = nestedItems.length > 0 ? nestedItems : [categoryItem];
+        }
 
         // Находим min/max перед отображением
         updateCategorySliders(selectedItems);
