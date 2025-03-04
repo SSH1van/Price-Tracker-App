@@ -14,6 +14,9 @@ const checkbox = document.getElementById("update-checkbox");
 /************************************************
  *          ВЫПОЛНЯЕТСЯ ПРИ ЗАГРУЗКЕ            *
  ************************************************/
+ // Отображение всех категорий
+ renderCategories();
+
 // Получаем диапазон дат, в котором можно выбирать периоды, когда собирались цены
 if (dateTimeRange) {
     const startDateInput = document.getElementById("start-date");
@@ -401,8 +404,6 @@ function get(startDate, endDate) {
         .then(response => response.json())
         .then(responseData => {
             window.data = responseData.data;
-            window.categories = responseData.categories;
-            renderCategories();
         })
         .catch(error => {
             console.error("Ошибка загрузки данных:", error);
@@ -583,7 +584,6 @@ rowSlider.addEventListener("input", () => {
 
 // Событие загрузки данных в установленном диапазоне
 document.getElementById("load-data-btn").addEventListener("click", function () {
-    document.getElementById('category-list').innerHTML = '';
     table.innerHTML = "";
 
     let startDate = document.getElementById("start-date").value;

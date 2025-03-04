@@ -24,8 +24,10 @@ public class MainController {
     @GetMapping("/")
     public String index(Model model) {
         Map.Entry<String, String> dateTimeRange = databaseService.getDateTimeRange();
+        var categories = databaseService.getStructuredCategories();
 
         model.addAttribute("dateTimeRange", dateTimeRange);
+        model.addAttribute("categories", categories);
         return "index";
     }
 
@@ -40,11 +42,9 @@ public class MainController {
         LocalDate end = LocalDate.parse(endDate, formatter);
 
         var data = databaseService.loadDataInRange(start, end);
-        var categories = databaseService.getStructuredCategories();
 
         Map<String, Object> response = new HashMap<>();
         response.put("data", data);
-        response.put("categories", categories);
 
         return ResponseEntity.ok(response);
     }

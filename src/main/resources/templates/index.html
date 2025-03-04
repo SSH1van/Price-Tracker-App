@@ -157,9 +157,9 @@
 
 <!-- Подгрузка данных извлечённых из БД -->
 <script th:inline="javascript">
-    window.dateTimeRange = /*[[${dateTimeRange}]]*/ [];
+    window.dateTimeRange = /*[[${dateTimeRange}]]*/
+    window.categories = /*[[${categories}]]*/ [];
     window.data = {};
-    window.categories = {};
 </script>
 
 </body>
