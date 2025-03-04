@@ -320,58 +320,78 @@ function renderCategories() {
     allLi.appendChild(allTitle);
     categoryList.appendChild(allLi);
 
-    // Отрисовка остальных категорий
-    for (const mainCategory in categories) {
-        const mainLi = document.createElement("li");
-        mainLi.classList.add("category-item");
+    for (const level1 in categories) {
+        const level1Li = document.createElement("li");
+        level1Li.classList.add("category-item");
 
-        const mainToggle = document.createElement("span");
-        mainToggle.classList.add("toggle-btn");
-        mainToggle.textContent = "▶";
-        mainToggle.onclick = () => mainUl.classList.toggle("nested");
+        const level1Toggle = document.createElement("span");
+        level1Toggle.classList.add("toggle-btn");
+        level1Toggle.textContent = "▶";
+        level1Toggle.onclick = () => level1Ul.classList.toggle("nested");
 
-        const mainTitle = document.createElement("strong");
-        mainTitle.textContent = mainCategory;
+        const level1Title = document.createElement("strong");
+        level1Title.textContent = level1;
 
-        const mainUl = document.createElement("ul");
-        mainUl.classList.add("nested");
+        const level1Ul = document.createElement("ul");
+        level1Ul.classList.add("nested");
 
-        for (const subCategory in categories[mainCategory]) {
-            const subLi = document.createElement("li");
-            subLi.classList.add("subcategory-item");
+        for (const level2 in categories[level1]) {
+            const level2Li = document.createElement("li");
+            level2Li.classList.add("subcategory-item");
 
-            const subToggle = document.createElement("span");
-            subToggle.classList.add("toggle-btn");
-            subToggle.textContent = "▶";
-            subToggle.onclick = () => subUl.classList.toggle("nested");
+            const level2Toggle = document.createElement("span");
+            level2Toggle.classList.add("toggle-btn");
+            level2Toggle.textContent = "▶";
+            level2Toggle.onclick = () => level2Ul.classList.toggle("nested");
 
-            const subTitle = document.createElement("span");
-            subTitle.textContent = subCategory;
+            const level2Title = document.createElement("span");
+            level2Title.textContent = level2;
 
-            const subUl = document.createElement("ul");
-            subUl.classList.add("nested");
+            const level2Ul = document.createElement("ul");
+            level2Ul.classList.add("nested");
 
-            for (const item in categories[mainCategory][subCategory]) {
-                const itemLi = document.createElement("li");
-                itemLi.setAttribute("data-category", item);
+            for (const level3 in categories[level1][level2]) {
+                const level3Li = document.createElement("li");
+                level3Li.classList.add("subcategory-item");
 
-                const itemLink = document.createElement("a");
-                itemLink.textContent = item;
+                const level3Toggle = document.createElement("span");
+                level3Toggle.classList.add("toggle-btn");
+                level3Toggle.textContent = "▶";
+                level3Toggle.onclick = () => level3Ul.classList.toggle("nested");
 
-                itemLi.appendChild(itemLink);
-                subUl.appendChild(itemLi);
+                const level3Title = document.createElement("span");
+                level3Title.textContent = level3;
+
+                const level3Ul = document.createElement("ul");
+                level3Ul.classList.add("nested");
+
+                for (const level4 in categories[level1][level2][level3]) {
+                    const level4Li = document.createElement("li");
+                    level4Li.setAttribute("data-category", level4);
+
+                    const level4Link = document.createElement("a");
+                    level4Link.textContent = level4;
+
+                    level4Li.appendChild(level4Link);
+                    level3Ul.appendChild(level4Li);
+                }
+
+                level3Li.appendChild(level3Toggle);
+                level3Li.appendChild(level3Title);
+                level3Li.appendChild(level3Ul);
+                level2Ul.appendChild(level3Li);
             }
 
-            subLi.appendChild(subToggle);
-            subLi.appendChild(subTitle);
-            subLi.appendChild(subUl);
-            mainUl.appendChild(subLi);
+            level2Li.appendChild(level2Toggle);
+            level2Li.appendChild(level2Title);
+            level2Li.appendChild(level2Ul);
+            level1Ul.appendChild(level2Li);
         }
 
-        mainLi.appendChild(mainToggle);
-        mainLi.appendChild(mainTitle);
-        mainLi.appendChild(mainUl);
-        categoryList.appendChild(mainLi);
+        level1Li.appendChild(level1Toggle);
+        level1Li.appendChild(level1Title);
+        level1Li.appendChild(level1Ul);
+        categoryList.appendChild(level1Li);
     }
 }
 

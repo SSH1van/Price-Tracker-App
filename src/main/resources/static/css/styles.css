@@ -149,10 +149,10 @@ h3 {
     color: #fff;
     cursor: pointer;
 }
-.subcategory-item ul li {
+.subcategory-item .subcategory-item ul li {
     transition: all 0.3s ease;
 }
-.subcategory-item ul li:hover {
+.subcategory-item .subcategory-item ul li:hover {
     background-color: #000;
     color: #fff;
     cursor: pointer;

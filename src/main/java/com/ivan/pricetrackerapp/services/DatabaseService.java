@@ -128,56 +128,54 @@ public class DatabaseService {
     }
 
     // Карта соответствия категорий
-    public Map<String, Map<String, Map<String, Object>>> getStructuredCategories(Map<String, Map<String, List<Map<String, Object>>>> rawData) {
-        Map<String, Map<String, Map<String, Object>>> categoryProducts = new LinkedHashMap<>();
+    public Map<String, Map<String, Map<String, Map<String, Object>>>> getStructuredCategories() {
+        Map<String, Map<String, Map<String, Map<String, Object>>>> categoryProducts = new LinkedHashMap<>();
 
-        Map<String, String> categoryMapping = new HashMap<>(Map.ofEntries(
-                // Телефоны и смарт-часы
-                Map.entry("Смартфоны", "Телефоны и смарт-часы>Смартфоны"),
-                Map.entry("Аксессуары для смартфонов и телефонов", "Телефоны и смарт-часы>Аксессуары для смартфонов и телефонов"),
-                Map.entry("Смарт-часы", "Телефоны и смарт-часы>Смарт-часы"),
-                Map.entry("Фитнес-браслеты", "Телефоны и смарт-часы>Фитнес-браслеты"),
-                Map.entry("Ремешки для смарт-часов и фитнес-браслетов", "Телефоны и смарт-часы>Ремешки для смарт-часов и фитнес-браслетов"),
-                Map.entry("Аксессуары для смарт-часов и фитнес-браслетов", "Телефоны и смарт-часы>Аксессуары для смарт-часов и фитнес-браслетов"),
-                Map.entry("Мобильные телефоны", "Телефоны и смарт-часы>Мобильные телефоны"),
-                Map.entry("Sim-карты", "Телефоны и смарт-часы>Sim-карты"),
-                Map.entry("Запчасти для смартфонов", "Телефоны и смарт-часы>Запчасти для смартфонов"),
-                Map.entry("Проводные и радиотелефоны", "Телефоны и смарт-часы>Проводные и радиотелефоны"),
+        String sql = """
+            SELECT 
+                c1.name AS level1,
+                c2.name AS level2,
+                c3.name AS level3,
+                c4.name AS level4
+            FROM categories c1
+            LEFT JOIN categories c2 ON c2.parent_id = c1.id AND c2.level = 2
+            LEFT JOIN categories c3 ON c3.parent_id = c2.id AND c3.level = 3
+            LEFT JOIN categories c4 ON c4.parent_id = c3.id AND c4.level = 4
+            WHERE c1.level = 1
+            ORDER BY c1.name, c2.name, c3.name, c4.name;
+        """;
 
-                // Ноутбуки, планшеты и электронные книги
-                Map.entry("Ноутбуки", "Ноутбуки, планшеты и электронные книги>Ноутбуки"),
-                Map.entry("Игровые ноутбуки", "Ноутбуки, планшеты и электронные книги>Игровые ноутбуки"),
-                Map.entry("Планшеты", "Ноутбуки, планшеты и электронные книги>Планшеты"),
-                Map.entry("Электронные книги", "Ноутбуки, планшеты и электронные книги>Электронные книги"),
-                Map.entry("Графические планшеты", "Ноутбуки, планшеты и электронные книги>Графические планшеты"),
-                Map.entry("Чехлы и подставки для планшетов", "Ноутбуки, планшеты и электронные книги>Чехлы и подставки для планшетов"),
-                Map.entry("Стилусы", "Ноутбуки, планшеты и электронные книги>Стилусы"),
-                Map.entry("Аксессуары для ноутбуков", "Ноутбуки, планшеты и электронные книги>Аксессуары для ноутбуков"),
-                Map.entry("Запчасти для ноутбуков и планшетов", "Ноутбуки, планшеты и электронные книги>Запчасти для ноутбуков и планшетов"),
-                Map.entry("Аккумуляторы для ноутбуков", "Ноутбуки, планшеты и электронные книги>Аккумуляторы для ноутбуков"),
-                Map.entry("Зарядные устройства", "Ноутбуки, планшеты и электронные книги>Зарядные устройства"),
-                Map.entry("Чехлы для электронных книг", "Ноутбуки, планшеты и электронные книги>Чехлы для электронных книг"),
-                Map.entry("Электронные переводчики и словари", "Ноутбуки, планшеты и электронные книги>Электронные переводчики и словари")
-        ));
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
 
-        for (String tableName : rawData.keySet()) {
-            String categoryPath = "Прочее>Разное";
+            while (rs.next()) {
+                String level1 = rs.getString("level1"); // Основная категория
+                String level2 = rs.getString("level2"); // Подкатегория
+                String level3 = rs.getString("level3"); // Категория
+                String level4 = rs.getString("level4"); // Конкретная подкатегория
 
-            for (Map.Entry<String, String> entry : categoryMapping.entrySet()) {
-                if (tableName.contains(entry.getKey())) {
-                    categoryPath = entry.getValue();
-                    break;
+                if (level2 == null) {
+                    continue; // Пропускаем, если нет подкатегории
+                }
+
+                // Заполняем структуру
+                Map<String, Map<String, Map<String, Object>>> level2Map = categoryProducts
+                        .computeIfAbsent(level1, k -> new LinkedHashMap<>());
+
+                Map<String, Map<String, Object>> level3Map = level2Map
+                        .computeIfAbsent(level2, k -> new LinkedHashMap<>());
+
+                Map<String, Object> level4Map = level3Map
+                        .computeIfAbsent(level3 != null ? level3 : "", k -> new LinkedHashMap<>());
+
+                if (level4 != null) {
+                    level4Map.computeIfAbsent(level4, k -> new LinkedHashMap<>());
                 }
             }
 
-            String[] levels = categoryPath.split(">");
-            String mainCategory = levels[0];
-            String subCategory = levels[1];
-
-            categoryProducts
-                    .computeIfAbsent(mainCategory, k -> new LinkedHashMap<>())
-                    .computeIfAbsent(subCategory, k -> new LinkedHashMap<>())
-                    .computeIfAbsent(tableName, k -> new LinkedHashMap<>());
+        } catch (SQLException e) {
+            LOGGER.error("Ошибка при загрузке данных из PostgreSQL", e);
         }
 
         return categoryProducts;

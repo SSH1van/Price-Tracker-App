@@ -40,7 +40,7 @@ public class MainController {
         LocalDate end = LocalDate.parse(endDate, formatter);
 
         var data = databaseService.loadDataInRange(start, end);
-        var categories = databaseService.getStructuredCategories(data);
+        var categories = databaseService.getStructuredCategories();
 
         Map<String, Object> response = new HashMap<>();
         response.put("data", data);
