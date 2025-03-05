@@ -572,8 +572,9 @@ document.getElementById('category-list').addEventListener('click', (event) => {
     if (!categoryItem) return;
 
     const checkbox = categoryItem.querySelector('input[type="checkbox"]');
-    const label = target.closest('label');
     const toggleBtn = target.closest('.toggle-btn');
+    const strongElement = target.closest('strong');
+    const spanElement = target.tagName === 'SPAN' && !target.classList.contains('toggle-btn') ? target : null;
 
     // Клик по toggle-btn — только сворачивание/разворачивание
     if (toggleBtn) {
@@ -589,14 +590,12 @@ document.getElementById('category-list').addEventListener('click', (event) => {
         return;
     }
 
-    // Клик по label или остальной части li — вызов processCategoryClick
-    runWithLoading(() => {
-        processCategoryClick(categoryItem);
-    });
-
-    // Если клик был по label, но не по чекбоксу, предотвращаем переключение чекбокса
-    if (label && target !== checkbox) {
-        event.preventDefault();
+    // Обрабатываем клик только если он был по <strong> или <span>
+    if (strongElement || spanElement) {
+        runWithLoading(() => {
+            processCategoryClick(categoryItem);
+        });
+        event.preventDefault(); // Предотвращаем переключение чекбокса
     }
 });
 
