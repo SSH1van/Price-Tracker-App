@@ -7,7 +7,7 @@
 Перед запуском приложения создайте файл `application.properties` в директории `resources` со следующей структурой:
 
 ```properties
-# Настройки безопасности
+# Настройки безопасности входа в систему пользователем
 app.security.username=username
 app.security.password=password
 
