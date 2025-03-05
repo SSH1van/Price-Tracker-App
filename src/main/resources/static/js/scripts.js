@@ -306,179 +306,88 @@ function renderCategories() {
     categoryList.innerHTML = "";
 
     const categories = window.categories;
-
     if (!categories || Object.keys(categories).length === 0) {
         categoryList.innerHTML = "<li>Категории не найдены</li>";
         return;
     }
 
-    // Добавляем элемент "Все" с чекбоксом
-    const allLi = document.createElement("li");
-    allLi.classList.add("category-item");
+    categoryList.appendChild(createCategoryItem("all", "Все", true));
 
-    const allCheckbox = document.createElement("input");
-    allCheckbox.type = "checkbox";
-    allCheckbox.id = "category-all";
+    Object.entries(categories).forEach(([title, children]) => {
+        categoryList.appendChild(createNestedCategory(title, children));
+    });
 
-    const allLabel = document.createElement("label");
-    allLabel.htmlFor = "category-all";
-    const allTitle = document.createElement("strong");
-    allTitle.textContent = "Все";
-    allLabel.appendChild(allTitle);
-
-    allLi.appendChild(allCheckbox);
-    allLi.appendChild(allLabel);
-    categoryList.appendChild(allLi);
-
-    for (const level1 in categories) {
-        const level1Li = document.createElement("li");
-        level1Li.classList.add("category-item");
-
-        const level1Checkbox = document.createElement("input");
-        level1Checkbox.type = "checkbox";
-        level1Checkbox.id = `category-${level1}`;
-
-        const level1Label = document.createElement("label");
-        level1Label.htmlFor = `category-${level1}`;
-
-        const level1Toggle = document.createElement("span");
-        level1Toggle.classList.add("toggle-btn");
-        level1Toggle.textContent = "▶";
-        level1Toggle.onclick = () => level1Ul.classList.toggle("active");
-
-        const level1Title = document.createElement("strong");
-        level1Title.textContent = level1;
-
-        const level1Ul = document.createElement("ul");
-        level1Ul.classList.add("nested");
-
-        for (const level2 in categories[level1]) {
-            const level2Li = document.createElement("li");
-            level2Li.classList.add("subcategory-item");
-
-            const level2Checkbox = document.createElement("input");
-            level2Checkbox.type = "checkbox";
-            level2Checkbox.id = `category-${level1}-${level2}`;
-
-            const level2Label = document.createElement("label");
-            level2Label.htmlFor = `category-${level1}-${level2}`;
-
-            const level2Toggle = document.createElement("span");
-            level2Toggle.classList.add("toggle-btn");
-            level2Toggle.textContent = "▶";
-            level2Toggle.onclick = () => level2Ul.classList.toggle("active");
-
-            const level2Title = document.createElement("span");
-            level2Title.textContent = level2;
-
-            const level2Ul = document.createElement("ul");
-            level2Ul.classList.add("nested");
-
-            for (const level3 in categories[level1][level2]) {
-                const level3Li = document.createElement("li");
-                level3Li.classList.add("subcategory-item");
-
-                const level3Checkbox = document.createElement("input");
-                level3Checkbox.type = "checkbox";
-                level3Checkbox.id = `category-${level1}-${level2}-${level3}`;
-
-                const level3Label = document.createElement("label");
-                level3Label.htmlFor = `category-${level1}-${level2}-${level3}`;
-
-                const level3Toggle = document.createElement("span");
-                level3Toggle.classList.add("toggle-btn");
-                level3Toggle.textContent = "▶";
-                level3Toggle.onclick = () => level3Ul.classList.toggle("active");
-
-                const level3Title = document.createElement("span");
-                level3Title.textContent = level3;
-
-                const level3Ul = document.createElement("ul");
-                level3Ul.classList.add("nested");
-
-                for (const level4 in categories[level1][level2][level3]) {
-                    const level4Li = document.createElement("li");
-                    level4Li.setAttribute("data-category", level4);
-
-                    const level4Checkbox = document.createElement("input");
-                    level4Checkbox.type = "checkbox";
-                    level4Checkbox.id = `category-${level1}-${level2}-${level3}-${level4}`;
-
-                    const level4Label = document.createElement("label");
-                    level4Label.htmlFor = `category-${level1}-${level2}-${level3}-${level4}`;
-
-                    const level4Link = document.createElement("span");
-                    level4Link.textContent = level4;
-
-                    level4Label.appendChild(level4Link);
-                    level4Li.appendChild(level4Checkbox);
-                    level4Li.appendChild(level4Label);
-                    level3Ul.appendChild(level4Li);
-                }
-
-                level3Label.appendChild(level3Toggle);
-                level3Label.appendChild(level3Title);
-                level3Li.appendChild(level3Checkbox);
-                level3Li.appendChild(level3Label);
-                level3Li.appendChild(level3Ul);
-                level2Ul.appendChild(level3Li);
-            }
-
-            level2Label.appendChild(level2Toggle);
-            level2Label.appendChild(level2Title);
-            level2Li.appendChild(level2Checkbox);
-            level2Li.appendChild(level2Label);
-            level2Li.appendChild(level2Ul);
-            level1Ul.appendChild(level2Li);
-        }
-
-        level1Label.appendChild(level1Toggle);
-        level1Label.appendChild(level1Title);
-        level1Li.appendChild(level1Checkbox);
-        level1Li.appendChild(level1Label);
-        level1Li.appendChild(level1Ul);
-        categoryList.appendChild(level1Li);
-    }
-
-    // Добавляем обработчик для синхронизации чекбоксов
     setupCheckboxSynchronization();
 }
 
-// Функция для синхронизации состояния чекбоксов
+function createCategoryItem(id, title, isTopLevel = false) {
+    const li = document.createElement("li");
+    li.classList.add(isTopLevel ? "category-item" : "subcategory-item");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = `category-${id}`;
+
+    const label = document.createElement("label");
+    label.htmlFor = checkbox.id;
+
+    const titleElement = document.createElement(isTopLevel ? "strong" : "span");
+    titleElement.textContent = title;
+
+    label.appendChild(titleElement);
+    li.appendChild(checkbox);
+    li.appendChild(label);
+
+    return li;
+}
+
+function createNestedCategory(title, children, parentIds = []) {
+    const fullId = [...parentIds, title].join('-');
+    const li = createCategoryItem(fullId, title, !parentIds.length);
+
+    if (Object.keys(children).length > 0) {
+        const toggle = document.createElement("span");
+        toggle.classList.add("toggle-btn");
+        toggle.textContent = "▶";
+
+        const ul = document.createElement("ul");
+        ul.classList.add("nested");
+
+        toggle.onclick = () => ul.classList.toggle("active");
+        li.querySelector("label").prepend(toggle);
+
+        Object.entries(children).forEach(([childTitle, grandChildren]) => {
+            const childLi = createNestedCategory(childTitle, grandChildren, [...parentIds, title]);
+            // Добавляем data-category только для листовых узлов
+            if (Object.keys(grandChildren).length === 0) {
+                childLi.setAttribute("data-category", childTitle);
+            }
+            ul.appendChild(childLi);
+        });
+
+        li.appendChild(ul);
+    } else {
+        li.setAttribute("data-category", title); // Листовой узел
+    }
+
+    return li;
+}
+
+// Настройка синхронизации чекбоксов
 function setupCheckboxSynchronization() {
     const categoryList = document.getElementById("category-list");
 
-    // Обработка чекбокса "Все"
-    const allCheckbox = document.getElementById("category-all");
-    allCheckbox.addEventListener("change", (event) => {
-        const isChecked = event.target.checked;
-        const allNestedCheckboxes = categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)");
-        allNestedCheckboxes.forEach((checkbox) => {
-            checkbox.checked = isChecked;
-        });
+    // Обработчик для "Все"
+    categoryList.querySelector("#category-all").addEventListener("change", (e) => {
+        const allCheckboxes = categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)");
+        allCheckboxes.forEach(cb => cb.checked = e.target.checked);
     });
 
-    // Обработка чекбоксов первого уровня и ниже
-    const topLevelCheckboxes = categoryList.querySelectorAll(".category-item > input[type='checkbox']");
-    topLevelCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", (event) => {
-            const isChecked = event.target.checked;
-            const nestedCheckboxes = event.target.closest(".category-item").querySelectorAll(".nested input[type='checkbox']");
-            nestedCheckboxes.forEach((nestedCheckbox) => {
-                nestedCheckbox.checked = isChecked;
-            });
-        });
-    });
-
-    // Добавляем обработку для вложенных уровней (2, 3 и т.д.)
-    const nestedCheckboxes = categoryList.querySelectorAll(".subcategory-item > input[type='checkbox']");
-    nestedCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", (event) => {
-            const isChecked = event.target.checked;
-            const deeperNestedCheckboxes = event.target.closest("li").querySelectorAll(".nested input[type='checkbox']");
-            deeperNestedCheckboxes.forEach((nestedCheckbox) => {
-                nestedCheckbox.checked = isChecked;
-            });
+    // Обработчик для всех уровней
+    categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)").forEach(checkbox => {
+        checkbox.addEventListener("change", (e) => {
+            const nested = e.target.closest("li").querySelectorAll(".nested input[type='checkbox']");
+            nested.forEach(cb => cb.checked = e.target.checked);
         });
     });
 }
@@ -568,15 +477,13 @@ function formatDate(input) {
 document.getElementById('category-list').addEventListener('click', (event) => {
     const target = event.target;
     const categoryItem = target.closest('li');
-
     if (!categoryItem) return;
 
     const checkbox = categoryItem.querySelector('input[type="checkbox"]');
     const toggleBtn = target.closest('.toggle-btn');
-    const strongElement = target.closest('strong');
-    const spanElement = target.tagName === 'SPAN' && !target.classList.contains('toggle-btn') ? target : null;
+    const clickableText = target.closest('strong') ||
+                        (target.tagName === 'SPAN' && !target.classList.contains('toggle-btn') ? target : null);
 
-    // Клик по toggle-btn — только сворачивание/разворачивание
     if (toggleBtn) {
         categoryItem.classList.toggle('open');
         event.preventDefault();
@@ -584,35 +491,34 @@ document.getElementById('category-list').addEventListener('click', (event) => {
         return;
     }
 
-    // Клик по самому чекбоксу — только переключение чекбокса
     if (target === checkbox) {
         event.stopPropagation();
         return;
     }
 
-    // Обрабатываем клик только если он был по <strong> или <span>
-    if (strongElement || spanElement) {
-        runWithLoading(() => {
-            processCategoryClick(categoryItem);
-        });
-        event.preventDefault(); // Предотвращаем переключение чекбокса
+    if (clickableText) {
+        event.preventDefault();
+        runWithLoading(() => processCategoryClick(categoryItem));
     }
 });
 
 function processCategoryClick(categoryItem) {
-    let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn), a');
-    let categoryName = categoryNameElement ? categoryNameElement.textContent.trim() : "Категория";
+    const categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn)');
+    const categoryName = categoryNameElement?.textContent.trim() || "Категория";
     tempCategoryName = categoryName;
-    let selectedItems;
 
+    let selectedItems;
     if (categoryName === "Все") {
         selectedItems = document.querySelectorAll('#category-list li[data-category]');
+    } else if (categoryItem.querySelectorAll('li[data-category]').length > 0) {
+        selectedItems = categoryItem.querySelectorAll('li[data-category]');
+    } else if (categoryItem.hasAttribute('data-category')) {
+        selectedItems = [categoryItem];
     } else {
-        const nestedItems = categoryItem.querySelectorAll('li[data-category]');
-        selectedItems = nestedItems.length > 0 ? nestedItems : [categoryItem];
+        selectedItems = [];
     }
 
-    if (Object.keys(data).length === 0) {
+    if (!Object.keys(data).length) {
         alert("Пожалуйста, предварительно загрузите данные.");
         overlay.classList.remove('active');
         return;
