@@ -312,25 +312,39 @@ function renderCategories() {
         return;
     }
 
-    // Добавляем элемент "Все" в начало списка
+    // Добавляем элемент "Все" с чекбоксом
     const allLi = document.createElement("li");
     allLi.classList.add("category-item");
 
+    const allCheckbox = document.createElement("input");
+    allCheckbox.type = "checkbox";
+    allCheckbox.id = "category-all";
+
+    const allLabel = document.createElement("label");
+    allLabel.htmlFor = "category-all";
     const allTitle = document.createElement("strong");
     allTitle.textContent = "Все";
-    allTitle.style.cursor = "pointer";
+    allLabel.appendChild(allTitle);
 
-    allLi.appendChild(allTitle);
+    allLi.appendChild(allCheckbox);
+    allLi.appendChild(allLabel);
     categoryList.appendChild(allLi);
 
     for (const level1 in categories) {
         const level1Li = document.createElement("li");
         level1Li.classList.add("category-item");
 
+        const level1Checkbox = document.createElement("input");
+        level1Checkbox.type = "checkbox";
+        level1Checkbox.id = `category-${level1}`;
+
+        const level1Label = document.createElement("label");
+        level1Label.htmlFor = `category-${level1}`;
+
         const level1Toggle = document.createElement("span");
         level1Toggle.classList.add("toggle-btn");
         level1Toggle.textContent = "▶";
-        level1Toggle.onclick = () => level1Ul.classList.toggle("nested");
+        level1Toggle.onclick = () => level1Ul.classList.toggle("active");
 
         const level1Title = document.createElement("strong");
         level1Title.textContent = level1;
@@ -341,6 +355,13 @@ function renderCategories() {
         for (const level2 in categories[level1]) {
             const level2Li = document.createElement("li");
             level2Li.classList.add("subcategory-item");
+
+            const level2Checkbox = document.createElement("input");
+            level2Checkbox.type = "checkbox";
+            level2Checkbox.id = `category-${level1}-${level2}`;
+
+            const level2Label = document.createElement("label");
+            level2Label.htmlFor = `category-${level1}-${level2}`;
 
             const level2Toggle = document.createElement("span");
             level2Toggle.classList.add("toggle-btn");
@@ -357,6 +378,13 @@ function renderCategories() {
                 const level3Li = document.createElement("li");
                 level3Li.classList.add("subcategory-item");
 
+                const level3Checkbox = document.createElement("input");
+                level3Checkbox.type = "checkbox";
+                level3Checkbox.id = `category-${level1}-${level2}-${level3}`;
+
+                const level3Label = document.createElement("label");
+                level3Label.htmlFor = `category-${level1}-${level2}-${level3}`;
+
                 const level3Toggle = document.createElement("span");
                 level3Toggle.classList.add("toggle-btn");
                 level3Toggle.textContent = "▶";
@@ -372,27 +400,42 @@ function renderCategories() {
                     const level4Li = document.createElement("li");
                     level4Li.setAttribute("data-category", level4);
 
-                    const level4Link = document.createElement("a");
+                    const level4Checkbox = document.createElement("input");
+                    level4Checkbox.type = "checkbox";
+                    level4Checkbox.id = `category-${level1}-${level2}-${level3}-${level4}`;
+
+                    const level4Label = document.createElement("label");
+                    level4Label.htmlFor = `category-${level1}-${level2}-${level3}-${level4}`;
+
+                    const level4Link = document.createElement("span");
                     level4Link.textContent = level4;
 
-                    level4Li.appendChild(level4Link);
+                    level4Label.appendChild(level4Link);
+                    level4Li.appendChild(level4Checkbox);
+                    level4Li.appendChild(level4Label);
                     level3Ul.appendChild(level4Li);
                 }
 
-                level3Li.appendChild(level3Toggle);
-                level3Li.appendChild(level3Title);
+                level3Label.appendChild(level3Toggle);
+                level3Label.appendChild(level3Title);
+                level3Li.appendChild(level3Checkbox);
+                level3Li.appendChild(level3Label);
                 level3Li.appendChild(level3Ul);
                 level2Ul.appendChild(level3Li);
             }
 
-            level2Li.appendChild(level2Toggle);
-            level2Li.appendChild(level2Title);
+            level2Label.appendChild(level2Toggle);
+            level2Label.appendChild(level2Title);
+            level2Li.appendChild(level2Checkbox);
+            level2Li.appendChild(level2Label);
             level2Li.appendChild(level2Ul);
             level1Ul.appendChild(level2Li);
         }
 
-        level1Li.appendChild(level1Toggle);
-        level1Li.appendChild(level1Title);
+        level1Label.appendChild(level1Toggle);
+        level1Label.appendChild(level1Title);
+        level1Li.appendChild(level1Checkbox);
+        level1Li.appendChild(level1Label);
         level1Li.appendChild(level1Ul);
         categoryList.appendChild(level1Li);
     }
@@ -481,49 +524,62 @@ function formatDate(input) {
  ************************************************/
 // События для категорий товаров
 document.getElementById('category-list').addEventListener('click', (event) => {
+    const target = event.target;
+    const categoryItem = target.closest('li');
+
+    if (!categoryItem) return;
+
+    const checkbox = categoryItem.querySelector('input[type="checkbox"]');
+    const label = target.closest('label');
+    const toggleBtn = target.closest('.toggle-btn');
+
+    // Клик по toggle-btn — только сворачивание/разворачивание
+    if (toggleBtn) {
+        categoryItem.classList.toggle('open');
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+    }
+
+    // Клик по самому чекбоксу — только переключение чекбокса
+    if (target === checkbox) {
+        event.stopPropagation();
+        return;
+    }
+
+    // Клик по label или остальной части li — вызов processCategoryClick
     runWithLoading(() => {
-        processCategoryClick(event);
+        processCategoryClick(categoryItem);
     });
+
+    // Если клик был по label, но не по чекбоксу, предотвращаем переключение чекбокса
+    if (label && target !== checkbox) {
+        event.preventDefault();
+    }
 });
 
-function processCategoryClick(event) {
-    const toggleBtn = event.target.closest('.toggle-btn');
-    const categoryItem = event.target.closest('li');
+function processCategoryClick(categoryItem) {
+    let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn), a');
+    let categoryName = categoryNameElement ? categoryNameElement.textContent.trim() : "Категория";
+    tempCategoryName = categoryName;
+    let selectedItems;
 
-    if (!categoryItem) {
+    if (categoryName === "Все") {
+        selectedItems = document.querySelectorAll('#category-list li[data-category]');
+    } else {
+        const nestedItems = categoryItem.querySelectorAll('li[data-category]');
+        selectedItems = nestedItems.length > 0 ? nestedItems : [categoryItem];
+    }
+
+    if (Object.keys(data).length === 0) {
+        alert("Пожалуйста, предварительно загрузите данные.");
         overlay.classList.remove('active');
         return;
     }
 
-    if (toggleBtn) {
-        // Переключение раскрытия подкатегорий
-        categoryItem.classList.toggle('open');
-        toggleBtn.textContent = categoryItem.classList.contains('open') ? '▼' : '▶';
-        overlay.classList.remove('active');
-    } else {
-        // Определяем текст категории
-        let categoryNameElement = categoryItem.querySelector('strong, span:not(.toggle-btn), a');
-        let categoryName = categoryNameElement ? categoryNameElement.textContent.trim() : "Категория";
-        tempCategoryName = categoryName;
-        let selectedItems;
-
-        // Если выбрано "Все"
-        if (categoryName === "Все") {
-            // Собираем все элементы с data-category из всех категорий
-            selectedItems = document.querySelectorAll('#category-list li[data-category]');
-        } else {
-            // Собираем все вложенные элементы с data-category для выбранной категории
-            const nestedItems = categoryItem.querySelectorAll('li[data-category]');
-            selectedItems = nestedItems.length > 0 ? nestedItems : [categoryItem];
-        }
-
-        // Находим min/max перед отображением
-        updateCategorySliders(selectedItems);
-
-        // Отображаем таблицу
-        showTable(selectedItems, categoryName);
-        overlay.classList.remove('active');
-    }
+    updateCategorySliders(selectedItems);
+    showTable(selectedItems, categoryName);
+    overlay.classList.remove('active');
 }
 
 // Вызов функции отрисовки графика для товара

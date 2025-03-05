@@ -119,7 +119,6 @@ h3 {
     overflow-y: auto;
     min-height: 0;
 }
-
 #category-list {
     list-style-type: none;
     margin: 0;
@@ -127,36 +126,30 @@ h3 {
 }
 #category-list li {
     padding: 5px;
+}
 
-}
-.category-item strong {
-    padding: 5px;
-    line-height: 1.7em;
-    transition: all 0.3s ease;
-}
-.category-item strong:hover {
-    background-color: #000;
-    color: #fff;
+.category-item strong,
+.subcategory-item span:nth-child(2),
+.subcategory-item ul .subcategory-item ul li label span {
+    padding: 6px 10px;
+    line-height: 1.6em;
+    transition: all 0.2s ease; /* Более быстрая анимация */
     cursor: pointer;
+    border-radius: 6px; /* Скругленные углы */
 }
-.subcategory-item span:nth-child(2) {
-    padding: 5px;
-    line-height: 1.7em;
-    transition: all 0.3s ease;
-}
-.subcategory-item span:nth-child(2):hover {
-    background-color: #000;
+
+.category-item strong:hover,
+.subcategory-item span:nth-child(2):hover,
+.subcategory-item ul .subcategory-item ul li label span:hover {
+    background-color: #007bff; /* Более яркий акцентный цвет */
     color: #fff;
-    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Легкая тень при наведении */
 }
-.subcategory-item .subcategory-item ul li {
-    transition: all 0.3s ease;
+
+.category-item:not(:first-child) {
+    margin-left: 20px;
 }
-.subcategory-item .subcategory-item ul li:hover {
-    background-color: #000;
-    color: #fff;
-    cursor: pointer;
-}
+
 .subcategory-item ul li:first-child {
     margin-top: 5px;
 }
@@ -166,19 +159,48 @@ h3 {
     display: none;
     margin-left: 20px;
 }
+.nested.active {
+    display: block;
+}
 .toggle-btn {
     cursor: pointer;
-    margin-right: 5px;
     user-select: none;
     font-size: 14px;
-    padding: 8px;
-    transition: all 0.3s ease;
+    padding: 6px;
+    transition: transform 0.2s ease;
+    display: inline-block;
+    color: #007bff;
+}
+.open > label > .toggle-btn {
+    transform: rotate(90deg);
 }
 .toggle-btn:hover {
-    color: #808080;
+    color: #0056b3;
 }
-.open > .nested {
-    display: block;
+
+/* ========== Стилизация чекбоксов ========== */
+input[type="checkbox"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    margin-right: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+input[type="checkbox"]:checked {
+    background-color: #007bff;
+    position: relative;
+}
+input[type="checkbox"]:checked::after {
+    content: "✔";
+    color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
 }
 
 /* ========== Контент: таблица и фильтры ========== */

@@ -93,7 +93,7 @@ public class DatabaseService {
             LOGGER.error("Ошибка при загрузке данных из PostgreSQL", e);
         }
 
-        filterData(data);
+        // filterData(data);
         return data;
     }
 
