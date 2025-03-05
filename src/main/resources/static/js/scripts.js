@@ -439,6 +439,48 @@ function renderCategories() {
         level1Li.appendChild(level1Ul);
         categoryList.appendChild(level1Li);
     }
+
+    // Добавляем обработчик для синхронизации чекбоксов
+    setupCheckboxSynchronization();
+}
+
+// Функция для синхронизации состояния чекбоксов
+function setupCheckboxSynchronization() {
+    const categoryList = document.getElementById("category-list");
+
+    // Обработка чекбокса "Все"
+    const allCheckbox = document.getElementById("category-all");
+    allCheckbox.addEventListener("change", (event) => {
+        const isChecked = event.target.checked;
+        const allNestedCheckboxes = categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)");
+        allNestedCheckboxes.forEach((checkbox) => {
+            checkbox.checked = isChecked;
+        });
+    });
+
+    // Обработка чекбоксов первого уровня и ниже
+    const topLevelCheckboxes = categoryList.querySelectorAll(".category-item > input[type='checkbox']");
+    topLevelCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", (event) => {
+            const isChecked = event.target.checked;
+            const nestedCheckboxes = event.target.closest(".category-item").querySelectorAll(".nested input[type='checkbox']");
+            nestedCheckboxes.forEach((nestedCheckbox) => {
+                nestedCheckbox.checked = isChecked;
+            });
+        });
+    });
+
+    // Добавляем обработку для вложенных уровней (2, 3 и т.д.)
+    const nestedCheckboxes = categoryList.querySelectorAll(".subcategory-item > input[type='checkbox']");
+    nestedCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", (event) => {
+            const isChecked = event.target.checked;
+            const deeperNestedCheckboxes = event.target.closest("li").querySelectorAll(".nested input[type='checkbox']");
+            deeperNestedCheckboxes.forEach((nestedCheckbox) => {
+                nestedCheckbox.checked = isChecked;
+            });
+        });
+    });
 }
 
 // Запрос о получении данных
