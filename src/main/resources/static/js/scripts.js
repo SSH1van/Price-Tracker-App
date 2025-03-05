@@ -366,7 +366,7 @@ function renderCategories() {
             const level2Toggle = document.createElement("span");
             level2Toggle.classList.add("toggle-btn");
             level2Toggle.textContent = "▶";
-            level2Toggle.onclick = () => level2Ul.classList.toggle("nested");
+            level2Toggle.onclick = () => level2Ul.classList.toggle("active");
 
             const level2Title = document.createElement("span");
             level2Title.textContent = level2;
@@ -388,7 +388,7 @@ function renderCategories() {
                 const level3Toggle = document.createElement("span");
                 level3Toggle.classList.add("toggle-btn");
                 level3Toggle.textContent = "▶";
-                level3Toggle.onclick = () => level3Ul.classList.toggle("nested");
+                level3Toggle.onclick = () => level3Ul.classList.toggle("active");
 
                 const level3Title = document.createElement("span");
                 level3Title.textContent = level3;
