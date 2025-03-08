@@ -346,7 +346,7 @@ function createNestedCategory(title, children, parentIds = []) {
     const li = createCategoryItem(fullId, title, !parentIds.length);
 
     if (Object.keys(children).length > 0) {
-        const toggle = document.createElement("span");
+        const toggle = document.createElement("button");
         toggle.classList.add("toggle-btn");
         toggle.textContent = "▶";
 

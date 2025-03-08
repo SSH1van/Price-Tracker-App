@@ -128,9 +128,9 @@ h3 {
     padding: 5px;
 }
 
-.category-item strong,
-.subcategory-item span:nth-child(2),
-.subcategory-item ul .subcategory-item ul li label span {
+
+#category-list strong,
+#category-list span {
     padding: 6px 10px;
     line-height: 1.6em;
     transition: all 0.2s ease;
@@ -138,9 +138,8 @@ h3 {
     border-radius: 6px;
 }
 
-.category-item strong:hover,
-.subcategory-item span:nth-child(2):hover,
-.subcategory-item ul .subcategory-item ul li label span:hover {
+#category-list strong:hover,
+#category-list span:hover {
     background-color: #007bff;
     color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -167,9 +166,10 @@ h3 {
     user-select: none;
     font-size: 14px;
     padding: 6px;
-    transition: transform 0.2s ease;
-    display: inline-block;
+    background: none;
+    border: none;
     color: #007bff;
+    transition: transform 0.2s ease;
 }
 .open > label > .toggle-btn {
     transform: rotate(90deg);
