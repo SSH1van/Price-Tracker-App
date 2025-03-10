@@ -78,9 +78,9 @@ public class DatabaseService {
                     int price = rs.getInt("price");
                     String timestamp = rs.getTimestamp("date")
                             .toLocalDateTime()
-                            .format(INPUT_FORMATTER); // Соответствует исходному формату
+                            .format(INPUT_FORMATTER);
 
-                    // Создаем структуру данных, аналогичную SQLite (categoryName вместо tableName)
+                    // Создаем структуру данных
                     data.computeIfAbsent(categoryName, k -> new HashMap<>())
                             .computeIfAbsent(productUrl, k -> new ArrayList<>())
                             .add(Map.of(
@@ -93,7 +93,7 @@ public class DatabaseService {
             LOGGER.error("Ошибка при загрузке данных из PostgreSQL", e);
         }
 
-        filterData(data);
+        // filterData(data);
         return data;
     }
 
@@ -132,28 +132,47 @@ public class DatabaseService {
         Map<String, Map<String, Map<String, Map<String, Object>>>> categoryProducts = new LinkedHashMap<>();
 
         String sql = """
-            SELECT 
+            WITH RECURSIVE category_tree AS (
+                SELECT\s
+                    id,
+                    name,
+                    parent_id,
+                    1 AS level
+                FROM categories
+                WHERE parent_id IS NULL
+               \s
+                UNION ALL
+               \s
+                SELECT\s
+                    c.id,
+                    c.name,
+                    c.parent_id,
+                    ct.level + 1 AS level
+                FROM categories c
+                JOIN category_tree ct ON c.parent_id = ct.id
+            )
+            SELECT\s
                 c1.name AS level1,
                 c2.name AS level2,
                 c3.name AS level3,
                 c4.name AS level4
-            FROM categories c1
-            LEFT JOIN categories c2 ON c2.parent_id = c1.id AND c2.level = 2
-            LEFT JOIN categories c3 ON c3.parent_id = c2.id AND c3.level = 3
-            LEFT JOIN categories c4 ON c4.parent_id = c3.id AND c4.level = 4
+            FROM category_tree c1
+            LEFT JOIN category_tree c2 ON c2.parent_id = c1.id AND c2.level = 2
+            LEFT JOIN category_tree c3 ON c3.parent_id = c2.id AND c3.level = 3
+            LEFT JOIN category_tree c4 ON c4.parent_id = c3.id AND c4.level = 4
             WHERE c1.level = 1
             ORDER BY c1.name, c2.name, c3.name, c4.name;
-        """;
+       \s""";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                String level1 = rs.getString("level1"); // Основная категория
-                String level2 = rs.getString("level2"); // Подкатегория
-                String level3 = rs.getString("level3"); // Категория
-                String level4 = rs.getString("level4"); // Конкретная подкатегория
+                String level1 = rs.getString("level1");
+                String level2 = rs.getString("level2");
+                String level3 = rs.getString("level3");
+                String level4 = rs.getString("level4");
 
                 if (level2 == null) {
                     continue; // Пропускаем, если нет подкатегории
@@ -180,4 +199,5 @@ public class DatabaseService {
 
         return categoryProducts;
     }
+
 }
