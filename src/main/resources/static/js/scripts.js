@@ -318,11 +318,13 @@ function renderCategories() {
     });
 
     setupCheckboxSynchronization();
+    updateCategoryActivity();
 }
 
 function createCategoryItem(id, title, isTopLevel = false) {
     const li = document.createElement("li");
     li.classList.add(isTopLevel ? "category-item" : "subcategory-item");
+    li.classList.add("disabled");
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
@@ -471,6 +473,25 @@ function get(startDate, endDate) {
         })
 }
 
+// Обновление активности категорий
+function updateCategoryActivity() {
+    const categoryList = document.getElementById("category-list");
+    const items = categoryList.querySelectorAll("li");
+
+    items.forEach(li => {
+        const checkbox = li.querySelector("input[type='checkbox']");
+        const hasCheckOrPartial = checkbox.checked || checkbox.classList.contains("partial");
+
+        if (hasCheckOrPartial) {
+            li.classList.remove("disabled");
+            li.classList.add("enabled");
+        } else {
+            li.classList.remove("enabled");
+            li.classList.add("disabled");
+        }
+    });
+}
+
 /************************************************
  *              ФУНКЦИОНАЛ ГРАФИКА              *
  ************************************************/
@@ -543,14 +564,22 @@ function formatDate(input) {
 // События для категорий товаров
 document.getElementById('category-list').addEventListener('click', (event) => {
     const target = event.target;
+
+    // Находим ближайший элемент списка категорий
     const categoryItem = target.closest('li');
     if (!categoryItem) return;
 
+    // Проверяем состояние категории
+    const isDisabled = categoryItem.classList.contains('disabled');
     const checkbox = categoryItem.querySelector('input[type="checkbox"]');
+    // Проверяем, кликнули ли по кнопке переключения
     const toggleBtn = target.closest('.toggle-btn');
+    // Проверяем текст внутри label или непосредственно strong/span
     const clickableText = target.closest('strong') ||
-                        (target.tagName === 'SPAN' && !target.classList.contains('toggle-btn') ? target : null);
+                         (target.tagName === 'SPAN' && !target.classList.contains('toggle-btn') ? target : null) ||
+                         (target.tagName === 'LABEL' && target.querySelector('strong, span:not(.toggle-btn)'));
 
+    // Кнопка toggle работает всегда
     if (toggleBtn) {
         categoryItem.classList.toggle('open');
         event.preventDefault();
@@ -558,14 +587,22 @@ document.getElementById('category-list').addEventListener('click', (event) => {
         return;
     }
 
-    if (target === checkbox) {
-        event.stopPropagation();
+    // Клик по тексту (включая текст внутри label)
+    if (clickableText) {
+        if (isDisabled) {
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+            event.preventDefault();
+            runWithLoading(() => processCategoryClick(categoryItem));
+        }
         return;
     }
 
-    if (clickableText) {
-        event.preventDefault();
-        runWithLoading(() => processCategoryClick(categoryItem));
+    // Клик по чекбоксу или пустой части label
+    if (target === checkbox || (target.tagName === 'LABEL' && !clickableText)) {
+        // Не блокируем событие, чтобы сработал change
+        return;
     }
 });
 
@@ -664,7 +701,9 @@ document.getElementById("load-data-btn").addEventListener("click", function () {
         return;
     }
 
-    runWithLoading(() => get(startDate, endDate));
+    runWithLoading(() => get(startDate, endDate).then(() => {
+        updateCategoryActivity();
+    }));
 });
 
 // Событие корректировки диапазона min max для фильтра последнего обновления цены

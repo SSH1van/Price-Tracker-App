@@ -135,10 +135,18 @@ h3 {
     transition: all 0.2s ease;
     cursor: pointer;
     border-radius: 6px;
-    color: #808080;
 }
-#category-list strong:hover,
-#category-list span:hover {
+#category-list .disabled > label > strong,
+#category-list .disabled > label > span {
+    color: #808080;
+    pointer-events: none;
+}
+#category-list .enabled > label > strong,
+#category-list .enabled > label > span {
+    color: #000;
+}
+#category-list .enabled > label > strong:hover,
+#category-list .enabled > label > span:hover {
     background-color: #007bff;
     color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
