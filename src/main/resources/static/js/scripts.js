@@ -386,10 +386,6 @@ function setupCheckboxSynchronization() {
 
         // Проверяем, есть ли вложенные чекбоксы для обработки
         if (nestedCheckboxes.length > 0) {
-            nestedCheckboxes.forEach((cb, index) => {
-                console.log(`Checkbox ${index + 1} (${cb.id}): checked = ${cb.checked}`);
-            });
-
             const allChecked = nestedCheckboxes.every(cb => cb.checked);
             const noneChecked = nestedCheckboxes.every(cb => !cb.checked);
 
@@ -432,7 +428,6 @@ function setupCheckboxSynchronization() {
     // Обработчик для "Все"
     const allCheckbox = categoryList.querySelector("#category-all");
     allCheckbox.addEventListener("change", (e) => {
-        console.log(1);
         const allCheckboxes = categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)");
         allCheckboxes.forEach(cb => {
             cb.checked = e.target.checked;
