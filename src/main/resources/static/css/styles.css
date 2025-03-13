@@ -128,7 +128,6 @@ h3 {
     padding: 5px;
 }
 
-
 #category-list strong,
 #category-list span {
     padding: 6px 10px;
@@ -136,8 +135,8 @@ h3 {
     transition: all 0.2s ease;
     cursor: pointer;
     border-radius: 6px;
+    color: #808080;
 }
-
 #category-list strong:hover,
 #category-list span:hover {
     background-color: #007bff;
@@ -188,6 +187,20 @@ input[type="checkbox"] {
     margin-right: 8px;
     cursor: pointer;
     vertical-align: middle;
+}
+input[type="checkbox"].partial {
+    background-color: #fff;
+    position: relative;
+}
+input[type="checkbox"].partial::after {
+    content: "−";
+    color: #007bff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    font-weight: bold;
 }
 input[type="checkbox"]:checked {
     background-color: #007bff;

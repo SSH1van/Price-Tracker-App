@@ -300,7 +300,7 @@ function runWithLoading(action) {
     });
 }
 
-// Отрисовка загруженных данных
+// Отображение всех категорий
 function renderCategories() {
     const categoryList = document.getElementById("category-list");
     categoryList.innerHTML = "";
@@ -377,19 +377,91 @@ function createNestedCategory(title, children, parentIds = []) {
 function setupCheckboxSynchronization() {
     const categoryList = document.getElementById("category-list");
 
-    // Обработчик для "Все"
-    categoryList.querySelector("#category-all").addEventListener("change", (e) => {
-        const allCheckboxes = categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)");
-        allCheckboxes.forEach(cb => cb.checked = e.target.checked);
-    });
+    // Проверка состояния поддерева
+    function updateCheckboxState(checkbox) {
+        const li = checkbox.closest("li");
+        // Исключаем текущий чекбокс из выборки
+        const nestedCheckboxes = Array.from(li.querySelectorAll(".nested input[type='checkbox']"))
+            .filter(cb => cb !== checkbox);
 
-    // Обработчик для всех уровней
-    categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)").forEach(checkbox => {
-        checkbox.addEventListener("change", (e) => {
-            const nested = e.target.closest("li").querySelectorAll(".nested input[type='checkbox']");
-            nested.forEach(cb => cb.checked = e.target.checked);
+        // Проверяем, есть ли вложенные чекбоксы для обработки
+        if (nestedCheckboxes.length > 0) {
+            nestedCheckboxes.forEach((cb, index) => {
+                console.log(`Checkbox ${index + 1} (${cb.id}): checked = ${cb.checked}`);
+            });
+
+            const allChecked = nestedCheckboxes.every(cb => cb.checked);
+            const noneChecked = nestedCheckboxes.every(cb => !cb.checked);
+
+            checkbox.classList.remove("partial");
+            if (noneChecked) {
+                checkbox.checked = false;
+            } else if (allChecked) {
+                checkbox.checked = true;
+            } else {
+                checkbox.checked = false;
+                checkbox.classList.add("partial");
+            }
+        }
+
+        // Обновляем родителя, если он есть
+        const parentLi = li.closest(".nested")?.parentElement;
+        if (parentLi) {
+            const parentCheckbox = parentLi.querySelector(":scope > input[type='checkbox']");
+            updateCheckboxState(parentCheckbox);
+        }
+    }
+
+    // Обновление состояния "Все"
+    function updateAllCheckbox() {
+        const allCheckbox = categoryList.querySelector("#category-all");
+        const allCheckboxes = categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)");
+        const checkedCount = Array.from(allCheckboxes).filter(cb => cb.checked).length;
+
+        allCheckbox.classList.remove("partial");
+        if (checkedCount === 0) {
+            allCheckbox.checked = false;
+        } else if (checkedCount === allCheckboxes.length) {
+            allCheckbox.checked = true;
+        } else {
+            allCheckbox.checked = false;
+            allCheckbox.classList.add("partial");
+        }
+    }
+
+    // Обработчик для "Все"
+    const allCheckbox = categoryList.querySelector("#category-all");
+    allCheckbox.addEventListener("change", (e) => {
+        console.log(1);
+        const allCheckboxes = categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)");
+        allCheckboxes.forEach(cb => {
+            cb.checked = e.target.checked;
+            cb.classList.remove("partial");
         });
     });
+
+    // Обработчики для остальных чекбоксов
+    categoryList.querySelectorAll("input[type='checkbox']:not(#category-all)").forEach(checkbox => {
+        checkbox.addEventListener("change", (e) => {
+            const li = e.target.closest("li");
+            const nestedCheckboxes = li.querySelectorAll(".nested input[type='checkbox']");
+
+            // Если есть дочерние элементы, синхронизируем их
+            if (nestedCheckboxes.length > 0) {
+                nestedCheckboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                    cb.classList.remove("partial");
+                });
+            }
+
+            // Обновляем состояние текущего чекбокса и всех родителей
+            updateCheckboxState(checkbox);
+            updateAllCheckbox();
+        });
+    });
+
+    // Инициализируем начальное состояние
+    updateAllCheckbox();
 }
 
 // Запрос о получении данных
