@@ -461,18 +461,6 @@ function setupCheckboxSynchronization() {
     updateAllCheckbox();
 }
 
-// Запрос о получении данных
-function get(startDate, endDate) {
-    return fetch(`/load-data?startDate=${startDate}&endDate=${endDate}`)
-        .then(response => response.json())
-        .then(responseData => {
-            window.data = responseData.data;
-        })
-        .catch(error => {
-            console.error("Ошибка загрузки данных:", error);
-        })
-}
-
 // Обновление активности категорий
 function updateCategoryActivity() {
     const categoryList = document.getElementById("category-list");
@@ -491,6 +479,25 @@ function updateCategoryActivity() {
         }
     });
 }
+
+// Запрос о получении данных
+function get(startDate, endDate) {
+    return fetch(`/load-data?startDate=${startDate}&endDate=${endDate}`)
+        .then(response => response.json())
+        .then(responseData => {
+            window.data = responseData.data;
+        })
+        .catch(error => {
+            console.error("Ошибка загрузки данных:", error);
+        })
+}
+
+// Обновление активности категорий
+function updateCategoryActivity() {
+    const categoryList = document.getElementById("category-list");
+    const items = categoryList.querySelectorAll("li");
+
+
 
 /************************************************
  *              ФУНКЦИОНАЛ ГРАФИКА              *
