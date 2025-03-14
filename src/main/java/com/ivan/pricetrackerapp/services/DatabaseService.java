@@ -57,19 +57,38 @@ public class DatabaseService {
 
 
     // Извлечение данных из PostgreSQL в указанном диапазоне дат
-    public Map<String, Map<String, List<Map<String, Object>>>> loadDataInRange(LocalDate start, LocalDate end) {
+    public Map<String, Map<String, List<Map<String, Object>>>> loadDataInRange(LocalDate start, LocalDate end, List<String> categories) {
         Map<String, Map<String, List<Map<String, Object>>>> data = new HashMap<>();
-        String sql = "SELECT c.name AS category_name, p.url AS product_url, pp.price, pp.date " +
-                "FROM product_prices pp " +
-                "JOIN products p ON pp.product_id = p.id " +
-                "JOIN categories c ON p.category_id = c.id " +
-                "WHERE pp.date >= ? AND pp.date <= ?";
+
+        // Базовый SQL-запрос
+        StringBuilder sql = new StringBuilder(
+                "SELECT c.name AS category_name, p.url AS product_url, pp.price, pp.date " +
+                        "FROM product_prices pp " +
+                        "JOIN products p ON pp.product_id = p.id " +
+                        "JOIN categories c ON p.category_id = c.id " +
+                        "WHERE pp.date >= ? AND pp.date <= ?"
+        );
+
+        // Добавляем фильтр по категориям, если они указаны
+        if (categories != null && !categories.isEmpty()) {
+            sql.append(" AND c.name IN (");
+            sql.append(String.join(",", Collections.nCopies(categories.size(), "?")));
+            sql.append(")");
+        }
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
 
+            // Устанавливаем параметры для дат
             pstmt.setTimestamp(1, Timestamp.valueOf(start.atStartOfDay()));
             pstmt.setTimestamp(2, Timestamp.valueOf(end.plusDays(1).atStartOfDay())); // Включаем весь последний день
+
+            // Устанавливаем параметры для категорий, если они есть
+            if (categories != null && !categories.isEmpty()) {
+                for (int i = 0; i < categories.size(); i++) {
+                    pstmt.setString(i + 3, categories.get(i)); // Начинаем с 3-го параметра после дат
+                }
+            }
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -93,7 +112,7 @@ public class DatabaseService {
             LOGGER.error("Ошибка при загрузке данных из PostgreSQL", e);
         }
 
-        // filterData(data);
+        filterData(data);
         return data;
     }
 

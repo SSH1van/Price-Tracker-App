@@ -481,23 +481,45 @@ function updateCategoryActivity() {
 }
 
 // Запрос о получении данных
-function get(startDate, endDate) {
-    return fetch(`/load-data?startDate=${startDate}&endDate=${endDate}`)
-        .then(response => response.json())
-        .then(responseData => {
-            window.data = responseData.data;
+function get(startDate, endDate, categories) {
+    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+    return fetch('/load-data', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken // Добавляем CSRF-токен в заголовок
+        },
+        body: JSON.stringify({
+            startDate,
+            endDate,
+            categories
         })
-        .catch(error => {
-            console.error("Ошибка загрузки данных:", error);
-        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+    })
+    .then(responseData => {
+        window.data = responseData.data;
+    })
+    .catch(error => {
+        console.error("Ошибка загрузки данных:", error);
+    });
 }
 
-// Обновление активности категорий
-function updateCategoryActivity() {
-    const categoryList = document.getElementById("category-list");
-    const items = categoryList.querySelectorAll("li");
-
-
+// Функция для получения выбранных категорий
+function getSelectedCategories() {
+    const checkedItems = document.querySelectorAll('#category-list li input[type="checkbox"]:checked');
+    return Array.from(checkedItems)
+        .map(checkbox => {
+            const li = checkbox.closest('li');
+            // Берем только листовые категории (с атрибутом data-category)
+            return li.hasAttribute('data-category') ? li.getAttribute('data-category') : null;
+        })
+        .filter(category => category !== null); // Убираем null значения
+}
 
 /************************************************
  *              ФУНКЦИОНАЛ ГРАФИКА              *
@@ -700,15 +722,22 @@ rowSlider.addEventListener("input", () => {
 document.getElementById("load-data-btn").addEventListener("click", function () {
     table.innerHTML = "";
 
-    let startDate = document.getElementById("start-date").value;
-    let endDate = document.getElementById("end-date").value;
+    const startDate = document.getElementById("start-date").value;
+    const endDate = document.getElementById("end-date").value;
 
     if (!startDate || !endDate) {
         alert("Выберите диапазон дат!");
         return;
     }
 
-    runWithLoading(() => get(startDate, endDate).then(() => {
+    // Получаем выбранные категории
+    const selectedCategories = getSelectedCategories();
+    if (selectedCategories.length === 0) {
+        alert("Выберите хотя бы одну категорию!");
+        return;
+    }
+
+    runWithLoading(() => get(startDate, endDate, selectedCategories).then(() => {
         updateCategoryActivity();
     }));
 });
